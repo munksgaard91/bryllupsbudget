@@ -71,7 +71,7 @@
     font-size:.72rem;
     color:var(--sage-600);
     font-weight:500;
-    margin-bottom:10px;
+    margin-bottom:2px;
   }
   header.hero h1{
     font-size:2.9rem;
@@ -143,24 +143,16 @@
   }
   .money-input:focus{outline:none;border-color:var(--sage-500);}
 
-  /* ---------- Sync status ---------- */
+  /* ---------- Sync status (lille info-linje under eyebrow) ---------- */
   .sync-status{
-    position:fixed;
-    top:14px;
-    right:18px;
-    z-index:60;
-    display:flex;
+    display:inline-flex;
     align-items:center;
-    gap:8px;
-    background:var(--white);
-    border:1px solid var(--line);
-    border-radius:999px;
-    padding:7px 14px 7px 10px;
-    font-size:.78rem;
+    gap:6px;
+    margin-bottom:2px;
+    font-size:.68rem;
     color:var(--muted);
-    box-shadow:var(--shadow);
   }
-  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none;}
+  .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex:none;}
   .sync-status.ok .sync-dot{background:var(--good);}
   .sync-status.saving .sync-dot{background:#d3a24a;animation:pulse 1s infinite;}
   .sync-status.error .sync-dot,.sync-status.offline .sync-dot{background:var(--terracotta);}
@@ -365,22 +357,6 @@
   .offer-cell-inner{display:flex;align-items:center;}
   .cell-value{font-weight:500;}
   .cell-value.inherited{color:var(--muted);font-style:italic;font-weight:400;}
-  .cell-badge, .cell-badge-spacer{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    margin-right:8px;
-    width:19px;
-    height:19px;
-    font-size:.8rem;
-    font-weight:700;
-    border-radius:50%;
-    vertical-align:middle;
-    flex:none;
-  }
-  .cell-badge.good{background:var(--good-bg);color:var(--good);}
-  .cell-badge.bad{background:var(--terracotta-bg);color:var(--terracotta);}
-  .cell-badge.neutral{background:var(--sage-100);color:var(--sage-600);}
 
   tfoot tr td{line-height:1.25;}
   tfoot tr.subtotal-row td{
@@ -689,7 +665,6 @@
   @media (max-width:640px){
     header.hero{padding:40px 0 26px;}
     header.hero h1{font-size:2.1rem;}
-    .sync-status{position:static;margin:12px 24px 0;}
     .frame-row{gap:14px;}
     .toolbar{margin-top:20px;}
     .modal{padding:24px 20px 20px;border-radius:16px;}
@@ -725,14 +700,13 @@
 </head>
 <body>
 
-<div class="sync-status" id="syncStatus">
-  <span class="sync-dot"></span>
-  <span id="syncStatusText">Indlæser…</span>
-</div>
-
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow">Bryllupsbudget 2027</div>
+    <div class="sync-status" id="syncStatus">
+      <span class="sync-dot"></span>
+      <span id="syncStatusText">Indlæser…</span>
+    </div>
     <h1>Rasmus &amp; Camilla Munksgaard</h1>
 
     <div class="frame-row">
@@ -1255,12 +1229,6 @@ function renderCompareControls(){
   selB.onchange = () => { state.compare.b = selB.value; persist(); render(); };
 }
 
-function badgeFor(diff){
-  if(Math.abs(diff) <= 500) return '<span class="cell-badge neutral" title="Cirka som forventet">=</span>';
-  if(diff > 0) return `<span class="cell-badge bad" title="${kr(diff)} dyrere end forventet">+</span>`;
-  return `<span class="cell-badge good" title="${kr(Math.abs(diff))} billigere end forventet">−</span>`;
-}
-
 let editingOwnItem = null;
 
 function visibleOwnEditInput(){
@@ -1307,7 +1275,7 @@ function renderTable(){
     html += `<tr class="cat-row"><td>${escapeHtml(cat.name)}</td><td class="cat-subtotal">${kr(catOwn)}</td>`;
     cols.forEach(o => {
       const catOfferTotal = categoryOfferSubtotal(cat, o);
-      html += `<td class="cat-subtotal">${badgeFor(catOfferTotal-catOwn)}${kr(catOfferTotal)}</td>`;
+      html += `<td class="cat-subtotal">${kr(catOfferTotal)}</td>`;
     });
     html += '</tr>';
     cat.items.forEach(item => {
@@ -1321,9 +1289,8 @@ function renderTable(){
       cols.forEach(o => {
         const val = effectiveValue(o, item.id);
         const inh = isInherited(o, item.id);
-        const diff = Number(val) - Number(state.ownBudget[item.id]);
         html += `<td class="offer-cell"><span class="offer-cell-inner cell-vcenter">
-          ${inh ? '<span class="cell-badge-spacer"></span>' : badgeFor(diff)}<span class="cell-value ${inh ? 'inherited' : ''}">${kr(val)}</span>
+          <span class="cell-value ${inh ? 'inherited' : ''}">${kr(val)}</span>
         </span></td>`;
       });
       html += '</tr>';
@@ -1373,13 +1340,12 @@ function renderMobileCards(cols){
       if(editingOwnItem === item.id){
         html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}"></div>`;
       } else {
-        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><span class="mobile-val">${kr(state.ownBudget[item.id])}<button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button></span></div>`;
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><span class="mobile-val"><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button>${kr(state.ownBudget[item.id])}</span></div>`;
       }
       cols.forEach(o => {
         const val = effectiveValue(o, item.id);
         const inh = isInherited(o, item.id);
-        const diff = Number(val) - Number(state.ownBudget[item.id]);
-        html += `<div class="mobile-item-row"><span class="mobile-col-name">${escapeHtml(o.name)}</span><span class="mobile-val ${inh ? 'inherited' : ''}">${inh ? '' : badgeFor(diff)}${kr(val)}</span></div>`;
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">${escapeHtml(o.name)}</span><span class="mobile-val ${inh ? 'inherited' : ''}">${kr(val)}</span></div>`;
       });
       html += `</div>`;
     });
@@ -1388,7 +1354,7 @@ function renderMobileCards(cols){
     html += `<div class="mobile-item-row"><span class="mobile-col-name">Subtotal – Vores budget</span><span class="mobile-val">${kr(catOwn)}</span></div>`;
     cols.forEach(o => {
       const catOfferTotal = categoryOfferSubtotal(cat, o);
-      html += `<div class="mobile-item-row"><span class="mobile-col-name">Subtotal – ${escapeHtml(o.name)}</span><span class="mobile-val">${badgeFor(catOfferTotal-catOwn)}${kr(catOfferTotal)}</span></div>`;
+      html += `<div class="mobile-item-row"><span class="mobile-col-name">Subtotal – ${escapeHtml(o.name)}</span><span class="mobile-val">${kr(catOfferTotal)}</span></div>`;
     });
     html += `</div></div>`;
   });
