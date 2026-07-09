@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rasmus &amp; Camilla Munksgaard — Bryllupsbudget 2027</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23fbf9f4'/%3E%3Ccircle cx='24' cy='38' r='13' fill='none' stroke='%234a6b45' stroke-width='5'/%3E%3Ccircle cx='40' cy='38' r='13' fill='none' stroke='%23c07b5f' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage-50:#f4f7f2;
+    --sage-100:#e8efe6;
+    --sage-200:#d3e2cd;
+    --sage-400:#9db895;
+    --sage-500:#7fa176;
+    --sage-600:#5f8358;
+    --sage-700:#4a6b45;
+    --sage-900:#2e4029;
+    --cream:#fbf9f4;
+    --white:#ffffff;
+    --text:#3a3f35;
+    --muted:#8b9186;
+    --line:#e4e6de;
+    --terracotta:#c07b5f;
+    --terracotta-bg:#f7e9e2;
+    --good:#4a7d5e;
+    --good-bg:#e3f0e5;
+    --shadow: 0 2px 10px rgba(60,70,50,.06), 0 1px 2px rgba(60,70,50,.05);
+  }
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{
+    margin:0;
+    overflow-x:hidden;
+    background:var(--cream);
+    color:var(--text);
+    font-family:'Jost', sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+  /* Delt bredde/margin-regel, så header, værktøjslinje, sammenlign-boks og
+     tabellen altid har præcis samme venstre/højre kant. */
+  .wrap, .toolbar, .compare-controls, .table-wrap, .empty-state, .all-offers{
+    max-width:1180px;
+    margin-left:auto;
+    margin-right:auto;
+    padding-left:24px;
+    padding-right:24px;
+    box-sizing:border-box;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    color:var(--sage-900);
+    letter-spacing:.01em;
+  }
+  a{color:var(--sage-700);}
+
+  /* ---------- Header ---------- */
+  header.hero{
+    background:linear-gradient(180deg,var(--sage-100) 0%, var(--cream) 100%);
+    padding:52px 0 34px;
+    border-bottom:1px solid var(--line);
+  }
+  header.hero .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:.72rem;
+    color:var(--sage-600);
+    font-weight:500;
+    margin-bottom:10px;
+  }
+  header.hero h1{
+    font-size:2.9rem;
+    margin:0 0 6px;
+  }
+  header.hero .sub{
+    color:var(--muted);
+    font-size:1.02rem;
+    margin-bottom:26px;
+  }
+  .frame-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    align-items:flex-end;
+  }
+  .frame-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 20px;
+    box-shadow:var(--shadow);
+  }
+  .frame-card label{
+    display:block;
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .frame-card .rng{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .frame-card .money-input{
+    width:150px;
+    font-size:1.05rem;
+    text-align:left;
+    background:#fff;
+  }
+  .frame-card input[type=number]{
+    width:80px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:7px 9px;
+    font-family:'Jost',sans-serif;
+    font-size:1.05rem;
+    background:#fff;
+    -moz-appearance:textfield;
+  }
+  .frame-card input[type=number]::-webkit-outer-spin-button,
+  .frame-card input[type=number]::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+
+  /* ---------- Money inputs (shared) ---------- */
+  .money-input{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 9px;
+    font-family:'Jost',sans-serif;
+    font-size:.92rem;
+    background:var(--sage-50);
+    text-align:right;
+    width:120px;
+  }
+  .money-input:focus{outline:none;border-color:var(--sage-500);}
+
+  /* ---------- Sync status ---------- */
+  .sync-status{
+    position:fixed;
+    top:14px;
+    right:18px;
+    z-index:60;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 14px 7px 10px;
+    font-size:.78rem;
+    color:var(--muted);
+    box-shadow:var(--shadow);
+  }
+  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none;}
+  .sync-status.ok .sync-dot{background:var(--good);}
+  .sync-status.saving .sync-dot{background:#d3a24a;animation:pulse 1s infinite;}
+  .sync-status.error .sync-dot,.sync-status.offline .sync-dot{background:var(--terracotta);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    margin-top:26px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:flex-start;
+  }
+  .toolbar .left, .toolbar .right{display:flex;gap:10px;flex-wrap:wrap;}
+  button, .btn{
+    font-family:'Jost',sans-serif;
+    font-size:.88rem;
+    border:1px solid var(--sage-500);
+    background:var(--sage-600);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:500;
+    transition:background .15s, transform .1s;
+  }
+  button:hover{background:var(--sage-700);}
+  button:active{transform:scale(.97);}
+  button.ghost{
+    background:transparent;
+    color:var(--sage-700);
+    border:1px solid var(--sage-400);
+  }
+  button.ghost:hover{background:var(--sage-100);}
+  button.danger{
+    background:transparent;
+    color:var(--terracotta);
+    border:1px solid var(--terracotta);
+  }
+  button.danger:hover{background:var(--terracotta-bg);}
+  button.small{padding:6px 12px;font-size:.78rem;}
+
+  /* Small inline pencil icon-button (headers, own-budget cells, chips) */
+  .pencil-btn{
+    background:none;
+    border:none;
+    padding:0 2px;
+    margin:0;
+    font-size:.85rem;
+    line-height:1;
+    color:inherit;
+    opacity:.55;
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .pencil-btn:hover{opacity:1;background:none;transform:none;}
+  .pencil-btn:active{transform:none;}
+
+  /* ---------- Compare controls ---------- */
+  .compare-controls{
+    margin-top:18px;
+    padding-top:14px;
+    padding-bottom:14px;
+    display:flex;
+    gap:18px;
+    align-items:center;
+    flex-wrap:wrap;
+    background:var(--sage-50);
+    border:1px solid var(--sage-200);
+    border-radius:14px;
+  }
+  .compare-controls .grp{display:flex;align-items:center;gap:8px;min-height:40px;flex:1 1 200px;min-width:0;}
+  .compare-controls label{
+    font-size:.82rem;
+    color:var(--sage-700);
+    font-weight:500;
+    line-height:1;
+    display:inline-flex;
+    align-items:center;
+    height:40px;
+  }
+  select{
+    font-family:'Jost',sans-serif;
+    padding:0 34px 0 14px;
+    height:40px;
+    line-height:38px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#fff url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%234a6b45' d='M5.5 7.5l4.5 4.5 4.5-4.5z'/%3E%3C/svg%3E") no-repeat right 10px center;
+    background-size:12px;
+    font-size:.85rem;
+    color:var(--text);
+    appearance:none;
+    -webkit-appearance:none;
+    cursor:pointer;
+    transition:border-color .15s;
+    vertical-align:middle;
+    box-sizing:border-box;
+    width:100%;
+    min-width:0;
+  }
+  select:hover{border-color:var(--sage-400);}
+  select:focus{outline:none;border-color:var(--sage-500);}
+
+  /* ---------- Table ---------- */
+  .table-wrap{
+    margin-top:26px;
+    overflow-x:auto;
+  }
+  table.compare{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    background:var(--white);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    min-width:760px;
+  }
+  table.compare thead th{
+    text-align:left;
+    padding:16px 18px;
+    background:var(--sage-900);
+    color:#fff;
+    font-weight:500;
+    font-size:.9rem;
+    position:sticky;
+    top:0;
+    vertical-align:top;
+  }
+  table.compare thead th.col-item{width:26%;}
+  /* Subtil skillelinje mellem "Vores budget" (originalen) og tilbudene */
+  table.compare thead th:nth-child(2){border-right:1px solid rgba(255,255,255,.18);}
+  table.compare tbody td:nth-child(2), table.compare tfoot td:nth-child(2){border-right:1px solid var(--sage-200);}
+  table.compare thead th .colhead{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-height:36px;
+  }
+  table.compare thead th .colname{
+    font-family:'Jost',sans-serif;
+    font-size:1.15rem;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  table.compare thead th .pencil-btn{color:#fff;opacity:.7;}
+  table.compare thead th .pencil-btn:hover{opacity:1;}
+
+  tr.cat-row td{
+    background:var(--sage-100);
+    color:var(--sage-700);
+    font-weight:600;
+    font-size:.76rem;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    padding:9px 18px;
+    border-top:1px solid var(--line);
+  }
+  tr.cat-row td.cat-subtotal{
+    text-transform:none;
+    letter-spacing:normal;
+    font-size:.82rem;
+    white-space:nowrap;
+  }
+  tbody tr.item-row{height:60px;}
+  tbody tr.item-row td{
+    height:60px;
+    padding:0 18px;
+    border-top:1px solid var(--line);
+    font-size:.92rem;
+    vertical-align:middle;
+  }
+  tbody tr.item-row:hover td{background:var(--sage-50);}
+  td.item-label{color:var(--text);}
+  /* Native vertical-align:middle på td'en (ovenfor) klarer nu den lodrette
+     centrering i stedet for absolut positionering. .cell-vcenter er bevidst
+     tom/uden effekt her — klassen står stadig i markup'et, men gør intet. */
+  .item-label-inner{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .item-desc{
+    display:block;
+    font-size:.74rem;
+    color:var(--muted);
+    font-weight:400;
+    margin-top:2px;
+  }
+  td.own-cell{white-space:nowrap;}
+  .cell-center{
+    display:flex;
+    align-items:center;
+  }
+  .own-display{display:inline-flex;align-items:center;gap:6px;}
+  .own-value{font-weight:500;}
+  td.offer-cell{white-space:nowrap;}
+  .offer-cell-inner{display:flex;align-items:center;}
+  .cell-value{font-weight:500;}
+  .cell-value.inherited{color:var(--muted);font-style:italic;font-weight:400;}
+  .cell-badge, .cell-badge-spacer{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:8px;
+    width:19px;
+    height:19px;
+    font-size:.8rem;
+    font-weight:700;
+    border-radius:50%;
+    vertical-align:middle;
+    flex:none;
+  }
+  .cell-badge.good{background:var(--good-bg);color:var(--good);}
+  .cell-badge.bad{background:var(--terracotta-bg);color:var(--terracotta);}
+  .cell-badge.neutral{background:var(--sage-100);color:var(--sage-600);}
+
+  tfoot tr td{line-height:1.25;}
+  tfoot tr.subtotal-row td{
+    padding:6px 18px;
+    background:var(--sage-50);
+    font-size:.8rem;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+  }
+  tfoot tr.subtotal-row td.subtotal-label{font-style:italic;}
+  tfoot tr.total-row td{
+    padding:12px 18px;
+    border-top:2px solid var(--sage-400);
+    font-family:'Jost',sans-serif;
+    font-variant-numeric:tabular-nums;
+    font-size:1.3rem;
+    font-weight:600;
+    color:var(--sage-900);
+    background:var(--sage-50);
+  }
+  tfoot tr.name-repeat-row td{
+    padding:0 18px 8px;
+    background:var(--sage-50);
+    font-family:'Cormorant Garamond',serif;
+    font-size:.95rem;
+    font-weight:600;
+    color:var(--sage-700);
+  }
+  tfoot tr.frame-diff-row td{
+    padding:6px 18px 14px;
+    background:var(--sage-50);
+    font-size:.8rem;
+    color:var(--muted);
+  }
+  .diff-tag{font-weight:600;}
+  .diff-tag.good{color:var(--good);}
+  .diff-tag.bad{color:var(--terracotta);}
+  .diff-tag.neutral{color:var(--muted);font-weight:400;}
+
+  .empty-state{
+    margin-top:26px;
+    padding-top:50px;
+    padding-bottom:50px;
+    text-align:center;
+    background:var(--white);
+    border-radius:18px;
+    border:1px dashed var(--sage-400);
+  }
+  .empty-state h2{margin-top:0;}
+  .empty-state p{color:var(--muted);}
+
+  /* ---------- All offers strip ---------- */
+  .all-offers{
+    margin-top:34px;
+    padding-top:20px;
+    padding-bottom:24px;
+    background:var(--sage-100);
+    border:1px solid var(--sage-200);
+    border-radius:18px;
+  }
+  .all-offers h3{margin:0 0 12px;font-size:1.3rem;}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 8px 8px 16px;
+    box-shadow:var(--shadow);
+    font-size:.85rem;
+  }
+  .chip .chip-total{color:var(--muted);}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(40,48,36,.45);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px;
+    overflow-y:auto;
+    z-index:100;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--cream);
+    border-radius:20px;
+    max-width:680px;
+    width:100%;
+    padding:32px 32px 26px;
+    box-shadow:0 20px 60px rgba(30,40,25,.25);
+  }
+  .modal h2{margin-top:0;margin-bottom:4px;}
+  .modal .modal-sub{color:var(--muted);font-size:.85rem;margin-bottom:22px;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--sage-700);
+    margin-bottom:6px;
+    font-weight:500;
+  }
+  .field input[type=text], .field input[type=url], .field textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:'Jost',sans-serif;
+    font-size:.92rem;
+    background:#fff;
+  }
+  .field textarea{min-height:64px;resize:vertical;}
+  .modal fieldset{
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin:0 0 16px;
+    padding:14px 16px 6px;
+  }
+  .modal fieldset legend{
+    padding:0 8px;
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:1.1rem;
+    color:var(--sage-700);
+  }
+  .modal-item-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-top:1px solid var(--sage-100);
+  }
+  .modal-item-row:first-of-type{border-top:none;}
+  .modal-item-row .mlabel{font-size:.87rem;flex:1;min-width:0;}
+  .modal-item-row .mdesc{
+    display:block;
+    font-size:.72rem;
+    color:var(--muted);
+    font-weight:400;
+    margin-top:2px;
+  }
+  .modal-item-row .money-input{width:130px;}
+  .modal-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:24px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .modal-actions .right{display:flex;gap:10px;}
+  .help-note{
+    background:var(--sage-100);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:.78rem;
+    color:var(--sage-700);
+    margin-bottom:18px;
+  }
+
+  /* ---------- Manage posts modal ---------- */
+  .manage-cat{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:14px;
+    background:#fff;
+  }
+  .drag-handle{
+    cursor:grab;
+    color:var(--muted);
+    font-size:1rem;
+    padding:0 4px;
+    user-select:none;
+    flex:none;
+    line-height:1;
+  }
+  .drag-handle:active{cursor:grabbing;}
+  .manage-cat.dragging, .manage-item-row.dragging{opacity:.4;}
+  .manage-cat.drag-over{border-top:2px solid var(--sage-500);}
+  .manage-item-row.drag-over{border-top:2px solid var(--sage-500);}
+  .manage-cat-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .manage-cat-head input[type=text]{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:7px 10px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.05rem;
+    font-weight:600;
+    color:var(--sage-700);
+    background:var(--sage-50);
+  }
+  .manage-items{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .manage-item-row{display:flex;align-items:center;gap:8px;}
+  .manage-item-fields, .add-item-fields{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    flex:1;
+    min-width:0;
+  }
+  .manage-item-fields input[type=text], .add-item-fields input[type=text]{
+    width:100%;
+    min-width:0;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 9px;
+    font-family:'Jost',sans-serif;
+    background:var(--sage-50);
+  }
+  .manage-item-fields .mi-label, .add-item-fields .mi-label{font-size:.85rem;}
+  .manage-item-fields .mi-desc, .add-item-fields .mi-desc{
+    font-size:.76rem;
+    color:var(--muted);
+    background:#fff;
+  }
+  .add-item-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    padding-top:8px;
+    border-top:1px dashed var(--sage-200);
+  }
+  .add-item-row .money-input{width:110px;background:#fff;align-self:flex-start;}
+  .new-cat-row{display:flex;gap:8px;align-items:center;}
+  .new-cat-row input[type=text]{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 12px;
+    font-family:'Jost',sans-serif;
+    font-size:.9rem;
+    background:#fff;
+  }
+
+  /* ---------- Mobil kort-visning (erstatter tabellen på smalle skærme) ---------- */
+  #mobileCardsWrap{display:none;}
+  .mobile-cat-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow);
+  }
+  .mobile-cat-title{
+    font-weight:600;
+    font-size:.76rem;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:var(--sage-700);
+    margin-bottom:8px;
+  }
+  .mobile-item{padding:10px 0;border-top:1px solid var(--sage-100);}
+  .mobile-item:first-of-type{border-top:none;padding-top:0;}
+  .mobile-item-label{font-weight:500;margin-bottom:6px;}
+  .mobile-item-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:.85rem;
+    padding:3px 0;
+    gap:10px;
+  }
+  .mobile-item-row .money-input{width:130px;}
+  .mobile-col-name{color:var(--muted);flex:none;}
+  .mobile-val{font-weight:500;display:inline-flex;align-items:center;}
+  .mobile-val.inherited{color:var(--muted);font-style:italic;font-weight:400;}
+  .mobile-cat-subtotal{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--sage-200);
+  }
+  .mobile-total-card{
+    background:var(--sage-50);
+    border:1px solid var(--sage-200);
+    border-radius:14px;
+    padding:16px;
+  }
+  .mobile-total-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.85rem;color:var(--muted);gap:10px;}
+  .mobile-total-row.grand{
+    font-family:'Jost',sans-serif;
+    font-weight:600;
+    font-size:1.15rem;
+    color:var(--sage-900);
+    border-top:2px solid var(--sage-400);
+    margin-top:6px;
+    padding-top:10px;
+  }
+  .mobile-offer-total{margin-top:16px;padding-top:14px;border-top:1px dashed var(--sage-200);}
+  .mobile-frame-diff{font-size:.8rem;color:var(--muted);margin-top:6px;}
+
+  @media (max-width:780px){
+    #tableDesktopWrap{display:none;}
+    #mobileCardsWrap{display:block;}
+  }
+
+  /* ---------- Responsivt: tablet/mobil ---------- */
+  @media (max-width:640px){
+    header.hero{padding:40px 0 26px;}
+    header.hero h1{font-size:2.1rem;}
+    .sync-status{position:static;margin:12px 24px 0;}
+    .frame-row{gap:14px;}
+    .toolbar{margin-top:20px;}
+    .modal{padding:24px 20px 20px;border-radius:16px;}
+    .overlay{padding:24px 12px;}
+  }
+
+  /* ---------- Responsivt: meget smal skærm (iPhone) ---------- */
+  @media (max-width:480px){
+    .wrap, .toolbar, .compare-controls, .table-wrap, .empty-state, .all-offers{
+      padding-left:16px;
+      padding-right:16px;
+    }
+    header.hero .eyebrow{font-size:.68rem;}
+    .frame-card{padding:12px 14px;}
+    .frame-card .money-input{width:120px;}
+  }
+
+  /* iOS zoomer siden ind når man fokuserer et felt med font-size < 16px —
+     tving derfor alle inputs/selects op på mindst 16px på smalle skærme. */
+  @media (max-width:780px){
+    input, select, textarea{font-size:16px;}
+    .modal-item-row .money-input{width:110px;}
+  }
+
+  /* Større tap-mål og synlighed for ikon-knapper på touch-skærme (der har
+     ingen :hover-tilstand, så den lave standard-opacity skal skrues op). */
+  @media (max-width:780px){
+    .pencil-btn{padding:8px;opacity:.75;}
+    .drag-handle{padding:8px;font-size:1.15rem;}
+    button.pencil-btn, .pencil-btn{min-width:32px;min-height:32px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sync-status" id="syncStatus">
+  <span class="sync-dot"></span>
+  <span id="syncStatusText">Indlæser…</span>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Bryllupsbudget 2027</div>
+    <h1>Rasmus &amp; Camilla Munksgaard</h1>
+
+    <div class="frame-row">
+      <div class="frame-card">
+        <label>Ønsket budget</label>
+        <div class="rng">
+          <input type="text" inputmode="numeric" class="money-input" id="frameTarget">
+          <span>kr.</span>
+        </div>
+      </div>
+      <div class="frame-card">
+        <label>Antal gæster</label>
+        <div class="rng">
+          <input type="number" step="1" min="0" id="guestCount">
+          <span>gæster</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="left">
+    <button id="btnAddOffer">+ Tilføj tilbud</button>
+    <button class="ghost" id="btnManagePosts">Tilpas poster</button>
+  </div>
+</div>
+
+<div class="compare-controls" id="compareControls" style="display:none;">
+  <div class="grp">
+    <label>Sammenlign med:</label>
+    <select id="selA"></select>
+  </div>
+  <div class="grp">
+    <label>og</label>
+    <select id="selB"></select>
+  </div>
+</div>
+
+<div class="table-wrap" id="tableWrap">
+  <div id="tableDesktopWrap"></div>
+  <div id="mobileCardsWrap"></div>
+</div>
+<div class="empty-state" id="emptyState" style="display:none;">
+  <h2>Ingen tilbud tilføjet endnu</h2>
+  <p>Tilføj jeres første tilbud (fx et sted I overvejer), så det kan sammenlignes med jeres eget forventede budget, post for post.</p>
+  <button id="btnAddOfferEmpty">+ Tilføj tilbud</button>
+</div>
+
+<div class="all-offers" id="allOffersWrap" style="display:none;">
+  <h3>Alle tilbud</h3>
+  <div class="chips" id="chips"></div>
+</div>
+
+<!-- ================= Modal ================= -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Tilføj tilbud</h2>
+    <div class="modal-sub">Udfyld kun de poster stedet/leverandøren rent faktisk tilbyder. Tomme felter arver automatisk prisen fra jeres eget forventede budget.</div>
+
+    <div class="field">
+      <label>Navn på sted/leverandør</label>
+      <input type="text" id="fName" placeholder="Fx Kragerup Gods">
+    </div>
+    <div class="field">
+      <label>Noter (valgfrit)</label>
+      <textarea id="fNotes" placeholder="Fx tilbudsnummer, vilkår, kontaktperson..."></textarea>
+    </div>
+
+    <div id="modalItemsWrap"></div>
+
+    <div class="modal-actions">
+      <div class="left">
+        <button class="danger" id="btnDelete" style="display:none;">Slet tilbud</button>
+      </div>
+      <div class="right">
+        <button class="ghost" id="btnCancel">Annullér</button>
+        <button id="btnSaveOffer">Gem tilbud</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: tilpas poster ================= -->
+<div class="overlay" id="postsOverlay">
+  <div class="modal">
+    <h2>Tilpas poster</h2>
+    <div class="modal-sub">Tilføj, omdøb eller slet kategorier og budgetposter. Nye poster tilføjes automatisk til alle tilbud (arvet, indtil de udfyldes for et konkret tilbud).</div>
+
+    <div id="manageCatsWrap"></div>
+
+    <div class="new-cat-row" style="margin-top:6px;">
+      <input type="text" id="newCatName" placeholder="Navn på ny kategori, fx Underholdning">
+      <button class="ghost small" id="btnAddCategory">+ Tilføj kategori</button>
+    </div>
+
+    <div class="modal-actions">
+      <div class="left"></div>
+      <div class="right">
+        <button class="ghost" id="btnClosePosts">Luk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   SKY-SYNC OPSÆTNING (valgfrit, men anbefalet)
+   ---------------------------------------------------------------------
+   For at Rasmus og Camilla altid ser samme data uden at skulle
+   eksportere/importere filer manuelt, bruger siden en gratis JSON-bin
+   hos jsonbin.io som "database".
+
+   Sådan sætter du det op (ca. 5 minutter, kun én gang):
+   1. Gå til https://jsonbin.io og opret en gratis konto.
+   2. Klik "Create Bin", indsæt {} som indhold, og gem.
+   3. Kopiér Bin-ID'et (vises i URL'en / dashboardet).
+   4. Gå til "API Keys" i din konto og kopiér din "X-Master-Key".
+   5. Indsæt begge dele herunder mellem citationstegnene.
+   6. Commit og push filen til jeres GitHub-repo.
+
+   Indtil dette er udfyldt, gemmes data kun lokalt i browseren
+   (localStorage) — siden virker stadig fint til at teste med.
+===================================================================== */
+const SYNC = {
+  enabled: true,
+  binId:  "6a4fe786da38895dfe475ae5",
+  apiKey: "$2a$10$dXi3nqUIt4Wp1muCv6Co1O1bJDOYSG6.qJWqVe3ahTCvLIlUjdwjm",
+  baseUrl: "https://api.jsonbin.io/v3/b"
+};
+
+/* ===================== Kategorier & poster ===================== */
+/* Bemærk: kategorier/poster gemmes i state.categories, så de kan
+   redigeres i browseren (se "Tilpas poster") og synkroniseres til skyen.
+   defaultCategories() bruges kun til at bygge start-/eksempeldata. */
+function defaultCategories(){
+  return [
+    { key:'venue', name:'Sted & fest', items:[
+      { id:'venue_package',    label:'Selskabspakke', desc:'Reception + fest + drikkevarer', def:138330 },
+      { id:'venue_ceremony',   label:'Vielse – opsætning', desc:'Buer/stole', def:10000 },
+      { id:'venue_decor',      label:'Oppyntning af festsal', desc:'Tyl/lyskæder', def:12900 },
+      { id:'venue_cocktailbar',label:'Cocktailbar', def:8000 },
+      { id:'venue_dj',         label:'DJ', def:8396 },
+      { id:'venue_deposit',    label:'Reservationsgebyr/depositum', def:0 },
+    ]},
+    { key:'food', name:'Mad & drikke', items:[
+      { id:'food_cake',      label:'Bryllupskage', def:3000 },
+      { id:'food_latenight', label:'Natmad', def:0 },
+    ]},
+    { key:'attire', name:'Brudepar & tøj', items:[
+      { id:'attire_groom', label:'Tøj og sko, brudgom', def:7000 },
+      { id:'attire_dress', label:'Brudekjole + sko', def:10000 },
+      { id:'attire_rings', label:'Vielsesringe', def:10000 },
+      { id:'attire_beauty',label:'Hår/makeup artist', def:3000 },
+    ]},
+    { key:'flowers', name:'Blomster', items:[
+      { id:'flowers_bouquet', label:'Brudebuket + knaphulsblomster', def:1000 },
+      { id:'flowers_decor',   label:'Blomsterdekorationer', def:5000 },
+    ]},
+    { key:'photo', name:'Foto & video', items:[
+      { id:'photo_main',  label:'Fotograf + videograf', def:15000 },
+      { id:'photo_cloud', label:'Foto-cloud til gæstebilleder', def:1000 },
+    ]},
+    { key:'logi', name:'Logistik & diverse', items:[
+      { id:'logi_hotel',         label:'Overnatning, brudepar', def:0 },
+      { id:'logi_fees',          label:'Vielsesgebyr/navneændring', def:0 },
+    ]},
+  ];
+}
+function allItems(s){
+  return (s.categories || []).flatMap(c => c.items);
+}
+
+function defaultOwnBudget(categories){
+  const o = {};
+  categories.flatMap(c=>c.items).forEach(i => o[i.id] = i.def);
+  return o;
+}
+function emptyOfferItems(categories){
+  const o = {};
+  categories.flatMap(c=>c.items).forEach(i => o[i.id] = null);
+  return o;
+}
+function catKeyUid(){ return 'c' + Math.random().toString(36).slice(2,8); }
+function itemIdUid(catKey){ return catKey + '_' + Math.random().toString(36).slice(2,8); }
+
+/* Sikrer at ældre/manglende felter i indlæst state udfyldes, så nye
+   kategorier/poster altid findes for både eget budget og alle tilbud,
+   og at slettede poster/kategorier ikke ligger tilbage som støv. */
+function normalizeState(s){
+  if(!s) return s;
+  if(!s.categories || !Array.isArray(s.categories) || s.categories.length===0){
+    s.categories = defaultCategories();
+  }
+  const items = allItems(s);
+  const validIds = new Set(items.map(i=>i.id));
+
+  s.ownBudget = s.ownBudget || {};
+  items.forEach(i => { if(s.ownBudget[i.id] === undefined) s.ownBudget[i.id] = i.def; });
+  Object.keys(s.ownBudget).forEach(k => { if(!validIds.has(k)) delete s.ownBudget[k]; });
+
+  // Robusthed: sikr at kernefelter altid findes som de rigtige typer, uanset
+  // hvor state kommer fra (frisk seed, gammel sky-data, delvist korrupt data).
+  if(!Array.isArray(s.offers)) s.offers = [];
+  s.offers.forEach(o => {
+    o.items = o.items || {};
+    items.forEach(i => { if(o.items[i.id] === undefined) o.items[i.id] = null; });
+    Object.keys(o.items).forEach(k => { if(!validIds.has(k)) delete o.items[k]; });
+  });
+
+  if(!s.compare || typeof s.compare !== 'object'){
+    s.compare = {};
+  }
+  if(!s.meta || typeof s.meta !== 'object'){
+    s.meta = { updatedAt: new Date().toISOString() };
+  }
+
+  if(!s.frame || typeof s.frame !== 'object'){
+    s.frame = { target: 190000 };
+  } else if(s.frame.target === undefined || s.frame.target === null){
+    // Migrering fra tidligere min/maks-ramme til ét ønsket budget-tal
+    s.frame.target = s.frame.max !== undefined ? s.frame.max : (s.frame.min !== undefined ? s.frame.min : 190000);
+  }
+
+  if(s.guestCount === undefined || s.guestCount === null){
+    s.guestCount = 60;
+  }
+
+  return s;
+}
+
+/* ===================== Eksempeldata ===================== */
+function buildDefaultState(){
+  const categories = defaultCategories();
+  return {
+    meta:{ updatedAt: new Date().toISOString() },
+    categories,
+    frame:{ target: 190000 },
+    guestCount: 60,
+    ownBudget: defaultOwnBudget(categories),
+    offers:[
+      {
+        id:'kragerup',
+        name:'Kragerup Gods',
+        link:'https://kragerup.dk',
+        notes:'Tilbud 249502 (09-06-2026, ikke bindende). 58 gæster, 24.–25. juli 2027, ekskl. værelser (gæster betaler selv). Softbar er kun vin/øl/vand, ikke spiritus. Pris på cocktailbar og vielse-opsætning ikke oplyst endnu — antaget lig vores eget budget indtil videre.',
+        items: Object.assign(emptyOfferItems(categories), {
+          venue_package: 138330,
+          venue_decor: 12900,
+          venue_dj: 8396,
+          food_cake: 0,
+          food_latenight: 0,
+        })
+      },
+      {
+        id:'lorem1',
+        name:'Lorem Ipsum Gods',
+        link:'https://example.com/lorem-ipsum-gods',
+        notes:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        items: Object.assign(emptyOfferItems(categories), {
+          venue_package: 165000,
+          venue_ceremony: 0,
+          venue_decor: 9500,
+          venue_cocktailbar: 12000,
+          venue_deposit: 15000,
+          food_latenight: 4500,
+        })
+      },
+      {
+        id:'lorem2',
+        name:'Dolor Sit Manor',
+        link:'https://example.com/dolor-sit-manor',
+        notes:'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+        items: Object.assign(emptyOfferItems(categories), {
+          venue_package: 121000,
+          venue_ceremony: 5000,
+          venue_decor: 15800,
+          venue_dj: 7200,
+          venue_deposit: 8000,
+          food_cake: 2500,
+        })
+      },
+    ],
+    compare:{ a:'kragerup', b:'lorem1' }
+  };
+}
+
+/* ===================== State ===================== */
+let state = null;
+const LS_KEY = 'bryllupsbudget_v1';
+
+function readLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveLocal(s){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); }catch(e){}
+}
+
+function setSyncStatus(kind, text){
+  const el = document.getElementById('syncStatus');
+  const txt = document.getElementById('syncStatusText');
+  el.className = 'sync-status ' + kind;
+  const map = {
+    ok: 'Gemt i skyen',
+    saving: 'Gemmer…',
+    error: 'Kunne ikke gemme i skyen',
+    offline: 'Ingen forbindelse — gemt lokalt',
+    'local-only': 'Kun lokal lagring (sky ikke konfigureret)',
+    loading: 'Indlæser…'
+  };
+  txt.textContent = text || map[kind] || '';
+}
+
+function isSyncConfigured(){
+  return SYNC.enabled && SYNC.binId && SYNC.binId.indexOf('PASTE_') !== 0 &&
+         SYNC.apiKey && SYNC.apiKey.indexOf('PASTE_') !== 0;
+}
+
+async function loadState(){
+  const local = readLocal();
+  if(local){ state = normalizeState(local); render(); }
+
+  if(!isSyncConfigured()){
+    if(!local){ state = buildDefaultState(); saveLocal(state); render(); }
+    setSyncStatus('local-only');
+    return;
+  }
+
+  setSyncStatus('loading');
+  try{
+    const res = await fetch(`${SYNC.baseUrl}/${SYNC.binId}/latest`, {
+      headers:{ 'X-Master-Key': SYNC.apiKey }
+    });
+    if(res.ok){
+      const data = await res.json();
+      let cloud = data.record;
+      if(!cloud || !cloud.meta){
+        // Tom / ny bin -> seed med eksempeldata
+        cloud = buildDefaultState();
+        await pushCloud(cloud);
+      }
+      cloud = normalizeState(cloud);
+      if(!local || !local.meta || new Date(cloud.meta.updatedAt) >= new Date(local.meta.updatedAt)){
+        state = cloud;
+        saveLocal(state);
+        render();
+      }
+      setSyncStatus('ok');
+    } else {
+      if(!local){ state = buildDefaultState(); render(); }
+      setSyncStatus('error');
+    }
+  }catch(e){
+    if(!local){ state = buildDefaultState(); render(); }
+    setSyncStatus('offline');
+  }
+
+  // Poll periodisk for opdateringer fra den anden part
+  setInterval(pollCloud, 25000);
+}
+
+async function pollCloud(){
+  if(!isSyncConfigured()) return;
+  // Undgå at forstyrre brugeren midt i en aktiv redigering: spring denne
+  // poll over hvis der redigeres et beløb inline, eller en af modalerne er åben.
+  // Ellers ville et indkommende cloud-render kunne nulstille ugemte indtastninger.
+  const overlayOpen = document.getElementById('overlay').classList.contains('open');
+  const postsOverlayOpen = document.getElementById('postsOverlay').classList.contains('open');
+  if(editingOwnItem || overlayOpen || postsOverlayOpen) return;
+  try{
+    const res = await fetch(`${SYNC.baseUrl}/${SYNC.binId}/latest`, { headers:{ 'X-Master-Key': SYNC.apiKey }});
+    if(!res.ok) return;
+    const data = await res.json();
+    const cloud = data.record;
+    if(cloud && cloud.meta && (!state.meta || new Date(cloud.meta.updatedAt) > new Date(state.meta.updatedAt))){
+      state = normalizeState(cloud);
+      saveLocal(state);
+      render();
+      setSyncStatus('ok');
+    }
+  }catch(e){ /* stille fejl ved polling */ }
+}
+
+let saveTimer = null;
+function persist(){
+  state.meta.updatedAt = new Date().toISOString();
+  saveLocal(state);
+  clearTimeout(saveTimer);
+  if(isSyncConfigured()){
+    setSyncStatus('saving');
+    saveTimer = setTimeout(() => pushCloud(state), 600);
+  }
+}
+async function pushCloud(s){
+  if(!isSyncConfigured()){ setSyncStatus('local-only'); return; }
+  try{
+    const res = await fetch(`${SYNC.baseUrl}/${SYNC.binId}`, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json', 'X-Master-Key': SYNC.apiKey },
+      body: JSON.stringify(s)
+    });
+    setSyncStatus(res.ok ? 'ok' : 'error');
+  }catch(e){ setSyncStatus('offline'); }
+}
+
+/* ===================== Tal-helpers ===================== */
+function kr(n){
+  n = Math.round(n || 0);
+  return n.toLocaleString('da-DK') + ' kr.';
+}
+function fmtInt(n){
+  n = Math.round(Number(n) || 0);
+  return n.toLocaleString('da-DK');
+}
+function parseMoneyInput(str){
+  const digits = String(str || '').replace(/\D/g,'');
+  return digits ? Number(digits) : 0;
+}
+function bindMoneyInput(el){
+  el.addEventListener('input', () => {
+    const caretFromEnd = el.value.length - (el.selectionStart ?? el.value.length);
+    const digits = el.value.replace(/\D/g,'');
+    el.value = digits ? Number(digits).toLocaleString('da-DK') : '';
+    const pos = Math.max(0, el.value.length - caretFromEnd);
+    try{ el.setSelectionRange(pos, pos); }catch(e){}
+  });
+}
+
+function effectiveValue(offer, itemId){
+  const v = offer.items[itemId];
+  return (v === null || v === undefined || v === '') ? state.ownBudget[itemId] : v;
+}
+function isInherited(offer, itemId){
+  const v = offer.items[itemId];
+  return (v === null || v === undefined || v === '');
+}
+function offerTotal(offer){
+  return allItems(state).reduce((sum,i) => sum + Number(effectiveValue(offer, i.id) || 0), 0);
+}
+function offerProvidedPart(offer){
+  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum : sum + Number(offer.items[i.id] || 0), 0);
+}
+function offerOwnPart(offer){
+  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum + Number(state.ownBudget[i.id] || 0) : sum, 0);
+}
+function ownTotal(){
+  return allItems(state).reduce((sum,i) => sum + Number(state.ownBudget[i.id] || 0), 0);
+}
+function categoryOwnSubtotal(cat){
+  return cat.items.reduce((sum,i) => sum + Number(state.ownBudget[i.id] || 0), 0);
+}
+function categoryOfferSubtotal(cat, offer){
+  return cat.items.reduce((sum,i) => sum + Number(effectiveValue(offer, i.id) || 0), 0);
+}
+function getOffer(id){ return state.offers.find(o => o.id === id); }
+function uid(){ return 'o' + Math.random().toString(36).slice(2,9); }
+
+/* ===================== Render ===================== */
+function render(){
+  if(!state) return;
+
+  document.getElementById('frameTarget').value = fmtInt(state.frame.target);
+  document.getElementById('guestCount').value = state.guestCount;
+
+  renderCompareControls();
+  renderTable();
+  renderChips();
+
+  document.getElementById('emptyState').style.display = state.offers.length === 0 ? 'block' : 'none';
+  document.getElementById('tableWrap').style.display = state.offers.length === 0 ? 'none' : 'block';
+  document.getElementById('allOffersWrap').style.display = state.offers.length === 0 ? 'none' : 'block';
+}
+
+function currentColumns(){
+  // Returnerer array af offer-objekter der skal vises som kolonner (maks 2).
+  // state.compare.b === '' betyder at brugeren bevidst har valgt kun ét tilbud.
+  if(state.offers.length <= 1) return state.offers.slice();
+  const a = getOffer(state.compare.a) || state.offers[0];
+  if(state.compare.b === '') return [a];
+  let b = getOffer(state.compare.b);
+  if(!b || b.id === a.id) b = state.offers.find(o => o.id !== a.id);
+  return [a, b].filter(Boolean);
+}
+
+function renderCompareControls(){
+  const wrap = document.getElementById('compareControls');
+  if(state.offers.length < 2){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+  const selA = document.getElementById('selA');
+  const selB = document.getElementById('selB');
+  if(!state.compare.a) state.compare.a = state.offers[0].id;
+  if(state.compare.b === undefined || state.compare.b === null){
+    state.compare.b = state.offers.find(o=>o.id!==state.compare.a)?.id ?? '';
+  }
+
+  function fill(sel, excludeId, selectedId, includeBlank){
+    sel.innerHTML = '';
+    if(includeBlank){
+      const blankOpt = document.createElement('option');
+      blankOpt.value = '';
+      blankOpt.textContent = '– Vis kun ét tilbud –';
+      if(selectedId === '') blankOpt.selected = true;
+      sel.appendChild(blankOpt);
+    }
+    state.offers.forEach(o => {
+      if(o.id === excludeId) return;
+      const opt = document.createElement('option');
+      opt.value = o.id; opt.textContent = o.name;
+      if(o.id === selectedId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  fill(selA, state.compare.b, state.compare.a, false);
+  fill(selB, state.compare.a, state.compare.b, true);
+
+  selA.onchange = () => { state.compare.a = selA.value; if(state.compare.b===state.compare.a) state.compare.b=''; persist(); render(); };
+  selB.onchange = () => { state.compare.b = selB.value; persist(); render(); };
+}
+
+function badgeFor(diff){
+  if(Math.abs(diff) <= 500) return '<span class="cell-badge neutral" title="Cirka som forventet">=</span>';
+  if(diff > 0) return `<span class="cell-badge bad" title="${kr(diff)} dyrere end forventet">+</span>`;
+  return `<span class="cell-badge good" title="${kr(Math.abs(diff))} billigere end forventet">−</span>`;
+}
+
+let editingOwnItem = null;
+
+function visibleOwnEditInput(){
+  return [...document.querySelectorAll('.own-edit-input')].find(el => el.offsetParent !== null) || document.querySelector('.own-edit-input');
+}
+function startEditOwn(itemId){
+  if(editingOwnItem && editingOwnItem !== itemId){
+    const prevInp = visibleOwnEditInput();
+    if(prevInp){ state.ownBudget[prevInp.dataset.item] = parseMoneyInput(prevInp.value); persist(); }
+  }
+  editingOwnItem = itemId;
+  renderTable();
+}
+function commitOwnEdit(inp){
+  inp = inp || visibleOwnEditInput();
+  if(inp){
+    state.ownBudget[inp.dataset.item] = parseMoneyInput(inp.value);
+    persist();
+  }
+  editingOwnItem = null;
+  render();
+}
+
+function renderTable(){
+  const wrap = document.getElementById('tableDesktopWrap');
+  if(state.offers.length === 0){ wrap.innerHTML=''; document.getElementById('mobileCardsWrap').innerHTML=''; return; }
+  const cols = currentColumns();
+
+  let html = '<table class="compare"><thead><tr>';
+  html += '<th class="col-item"></th>';
+  html += '<th><div class="colhead"><span class="colname">Vores budget</span></div></th>';
+  cols.forEach(o => {
+    html += `<th><div class="colhead">
+      <span class="colname">${escapeHtml(o.name)}
+        <button class="pencil-btn" onclick="openEditOffer('${o.id}')" title="Redigér">✎</button>
+      </span>
+    </div></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  state.categories.forEach(cat => {
+    if(cat.items.length === 0) return;
+    const catOwn = categoryOwnSubtotal(cat);
+    html += `<tr class="cat-row"><td>${escapeHtml(cat.name)}</td><td class="cat-subtotal">${kr(catOwn)}</td>`;
+    cols.forEach(o => {
+      const catOfferTotal = categoryOfferSubtotal(cat, o);
+      html += `<td class="cat-subtotal">${badgeFor(catOfferTotal-catOwn)}${kr(catOfferTotal)}</td>`;
+    });
+    html += '</tr>';
+    cat.items.forEach(item => {
+      html += '<tr class="item-row">';
+      html += `<td class="item-label"><span class="item-label-inner cell-vcenter"><span class="item-label-text">${escapeHtml(item.label)}</span><span class="item-desc">${item.desc ? escapeHtml(item.desc) : '&nbsp;'}</span></span></td>`;
+      if(editingOwnItem === item.id){
+        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}"></span></td>`;
+      } else {
+        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><span class="own-display"><span class="own-value">${kr(state.ownBudget[item.id])}</span><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button></span></span></td>`;
+      }
+      cols.forEach(o => {
+        const val = effectiveValue(o, item.id);
+        const inh = isInherited(o, item.id);
+        const diff = Number(val) - Number(state.ownBudget[item.id]);
+        html += `<td class="offer-cell"><span class="offer-cell-inner cell-vcenter">
+          ${inh ? '<span class="cell-badge-spacer"></span>' : badgeFor(diff)}<span class="cell-value ${inh ? 'inherited' : ''}">${kr(val)}</span>
+        </span></td>`;
+      });
+      html += '</tr>';
+    });
+  });
+
+  html += '</tbody><tfoot>';
+  const ot = ownTotal();
+  html += `<tr class="subtotal-row"><td class="subtotal-label">Fra tilbuddet</td><td>&nbsp;</td>`;
+  cols.forEach(o => { html += `<td>${kr(offerProvidedPart(o))}</td>`; });
+  html += '</tr>';
+  html += `<tr class="subtotal-row"><td class="subtotal-label">Fra eget budget (ikke oplyst)</td><td>&nbsp;</td>`;
+  cols.forEach(o => { html += `<td>${kr(offerOwnPart(o))}</td>`; });
+  html += '</tr>';
+  html += `<tr class="total-row"><td>Total</td><td>${kr(ot)}</td>`;
+  cols.forEach(o => {
+    const t = offerTotal(o);
+    html += `<td>${kr(t)}</td>`;
+  });
+  html += '</tr>';
+  html += `<tr class="name-repeat-row"><td></td><td>Vores budget</td>`;
+  cols.forEach(o => { html += `<td>${escapeHtml(o.name)}</td>`; });
+  html += '</tr>';
+  html += `<tr class="frame-diff-row"><td>vs. ønsket budget (${kr(state.frame.target)})</td><td>${frameDiffText(ot)}</td>`;
+  cols.forEach(o => { html += `<td>${frameDiffText(offerTotal(o))}</td>`; });
+  html += '</tr>';
+  html += '</tfoot></table>';
+
+  wrap.innerHTML = html;
+
+  renderMobileCards(cols);
+  wireOwnEditInputs();
+}
+
+/* Kort-baseret visning til smalle skærme (erstatter tabellen via CSS-media-query,
+   så man slipper for sidescroll på mobil). Bruger samme data/regnestykker som
+   skrivebords-tabellen. */
+function renderMobileCards(cols){
+  const wrap = document.getElementById('mobileCardsWrap');
+  let html = '';
+
+  state.categories.forEach(cat => {
+    if(cat.items.length === 0) return;
+    html += `<div class="mobile-cat-card"><div class="mobile-cat-title">${escapeHtml(cat.name)}</div>`;
+    cat.items.forEach(item => {
+      html += `<div class="mobile-item"><div class="mobile-item-label">${escapeHtml(item.label)}${item.desc ? `<span class="item-desc">${escapeHtml(item.desc)}</span>` : ''}</div>`;
+      if(editingOwnItem === item.id){
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}"></div>`;
+      } else {
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><span class="mobile-val">${kr(state.ownBudget[item.id])}<button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button></span></div>`;
+      }
+      cols.forEach(o => {
+        const val = effectiveValue(o, item.id);
+        const inh = isInherited(o, item.id);
+        const diff = Number(val) - Number(state.ownBudget[item.id]);
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">${escapeHtml(o.name)}</span><span class="mobile-val ${inh ? 'inherited' : ''}">${inh ? '' : badgeFor(diff)}${kr(val)}</span></div>`;
+      });
+      html += `</div>`;
+    });
+    const catOwn = categoryOwnSubtotal(cat);
+    html += `<div class="mobile-cat-subtotal">`;
+    html += `<div class="mobile-item-row"><span class="mobile-col-name">Subtotal – Vores budget</span><span class="mobile-val">${kr(catOwn)}</span></div>`;
+    cols.forEach(o => {
+      const catOfferTotal = categoryOfferSubtotal(cat, o);
+      html += `<div class="mobile-item-row"><span class="mobile-col-name">Subtotal – ${escapeHtml(o.name)}</span><span class="mobile-val">${badgeFor(catOfferTotal-catOwn)}${kr(catOfferTotal)}</span></div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  const ot = ownTotal();
+  html += `<div class="mobile-total-card"><div class="mobile-total-row grand"><span>Vores budget</span><span>${kr(ot)}</span></div>`;
+  cols.forEach(o => {
+    const t = offerTotal(o);
+    html += `<div class="mobile-offer-total">`;
+    html += `<div class="mobile-total-row" style="font-weight:600;color:var(--sage-900);"><span>${escapeHtml(o.name)}</span><span></span></div>`;
+    html += `<div class="mobile-total-row"><span>Fra tilbuddet</span><span>${kr(offerProvidedPart(o))}</span></div>`;
+    html += `<div class="mobile-total-row"><span>Fra eget budget (ikke oplyst)</span><span>${kr(offerOwnPart(o))}</span></div>`;
+    html += `<div class="mobile-total-row grand"><span>Total</span><span>${kr(t)}</span></div>`;
+    html += `<div class="mobile-frame-diff">${frameDiffText(t)}</div>`;
+    html += `</div>`;
+  });
+  html += `<div class="mobile-frame-diff" style="margin-top:14px;"><strong>Vores budget</strong> vs. ønsket budget (${kr(state.frame.target)}): ${frameDiffText(ot)}</div>`;
+  html += `</div>`;
+
+  wrap.innerHTML = html;
+}
+
+/* Fælles opsætning af det (evt.) synlige inline-redigeringsfelt for eget budget,
+   uanset om det er skrivebords-tabellen eller mobil-kortene der er aktive. */
+function wireOwnEditInputs(){
+  if(!editingOwnItem) return;
+  document.querySelectorAll('.own-edit-input').forEach(inp => {
+    bindMoneyInput(inp);
+    inp.addEventListener('blur', () => commitOwnEdit(inp));
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ inp.blur(); }
+      if(e.key === 'Escape'){ editingOwnItem = null; renderTable(); }
+    });
+  });
+  // Fokusér kun det felt der reelt er synligt (skjulte felter kan ikke få fokus).
+  const visible = [...document.querySelectorAll('.own-edit-input')].find(el => el.offsetParent !== null);
+  if(visible){ visible.focus(); visible.select(); }
+}
+
+function frameDiffText(total){
+  const d = total - state.frame.target;
+  if(Math.abs(d) <= 500) return `<span class="diff-tag neutral">= ca. som ønsket budget</span>`;
+  if(d > 0) return `<span class="diff-tag bad">+ ${kr(d)} over ønsket budget</span>`;
+  return `<span class="diff-tag good">− ${kr(Math.abs(d))} under ønsket budget</span>`;
+}
+
+function renderChips(){
+  const wrap = document.getElementById('chips');
+  wrap.innerHTML = '';
+  state.offers.forEach(o => {
+    const div = document.createElement('div');
+    div.className = 'chip';
+    div.innerHTML = `<span>${escapeHtml(o.name)}</span><span class="chip-total">${kr(offerTotal(o))}</span>`;
+    const editBtn = document.createElement('button');
+    editBtn.className = 'pencil-btn';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Redigér';
+    editBtn.onclick = () => openEditOffer(o.id);
+    div.appendChild(editBtn);
+    wrap.appendChild(div);
+  });
+}
+
+/* ===================== Modal: tilføj/redigér tilbud ===================== */
+let editingId = null;
+
+function buildModalItems(existingItems){
+  const wrap = document.getElementById('modalItemsWrap');
+  wrap.innerHTML = '';
+  state.categories.forEach(cat => {
+    if(cat.items.length === 0) return;
+    const fs = document.createElement('fieldset');
+    const legend = document.createElement('legend');
+    legend.textContent = cat.name;
+    fs.appendChild(legend);
+    cat.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'modal-item-row';
+      const own = state.ownBudget[item.id];
+      const existingVal = existingItems && existingItems[item.id] !== null && existingItems[item.id] !== undefined ? existingItems[item.id] : '';
+      row.innerHTML = `
+        <span class="mlabel">${escapeHtml(item.label)}${item.desc ? `<span class="mdesc">${escapeHtml(item.desc)}</span>` : ''}</span>
+        <input type="text" inputmode="numeric" class="money-input" placeholder="${fmtInt(own)}" data-item="${item.id}"
+          value="${existingVal !== '' ? fmtInt(existingVal) : ''}">
+      `;
+      fs.appendChild(row);
+      bindMoneyInput(row.querySelector('input'));
+    });
+    wrap.appendChild(fs);
+  });
+}
+
+function openAddOffer(){
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Tilføj tilbud';
+  document.getElementById('fName').value = '';
+  document.getElementById('fNotes').value = '';
+  document.getElementById('btnDelete').style.display = 'none';
+  buildModalItems(null);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openEditOffer(id){
+  const o = getOffer(id);
+  if(!o) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Redigér tilbud';
+  document.getElementById('fName').value = o.name;
+  document.getElementById('fNotes').value = o.notes || '';
+  document.getElementById('btnDelete').style.display = 'inline-block';
+  buildModalItems(o.items);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function saveOfferFromModal(){
+  const name = document.getElementById('fName').value.trim();
+  if(!name){ alert('Skriv venligst et navn på stedet/leverandøren.'); return; }
+  const notes = document.getElementById('fNotes').value.trim();
+  const items = {};
+  document.querySelectorAll('#modalItemsWrap input').forEach(inp => {
+    const v = inp.value.trim();
+    items[inp.dataset.item] = (v === '' ? null : parseMoneyInput(v));
+  });
+
+  if(editingId){
+    const o = getOffer(editingId);
+    o.name = name; o.notes = notes; o.items = items;
+  } else {
+    const newOffer = { id: uid(), name, notes, items };
+    state.offers.push(newOffer);
+    if(state.offers.length === 1) state.compare.a = newOffer.id;
+    else if(state.offers.length === 2) state.compare.b = newOffer.id;
+  }
+  persist();
+  closeModal();
+  render();
+}
+
+function deleteOffer(){
+  if(!editingId) return;
+  if(!confirm('Er du sikker på du vil slette dette tilbud?')) return;
+  state.offers = state.offers.filter(o => o.id !== editingId);
+  if(state.compare.a === editingId) state.compare.a = state.offers[0]?.id || null;
+  if(state.compare.b === editingId) state.compare.b = state.offers.find(o=>o.id!==state.compare.a)?.id || null;
+  persist();
+  closeModal();
+  render();
+}
+
+/* ===================== Modal: tilpas poster ===================== */
+function removeItemFromState(itemId){
+  delete state.ownBudget[itemId];
+  state.offers.forEach(o => { delete o.items[itemId]; });
+}
+
+let dragCatKey = null;
+let dragItem = null; // { catKey, itemId }
+
+function reorderCategory(draggedKey, targetKey){
+  if(draggedKey === targetKey) return;
+  const fromIdx = state.categories.findIndex(c => c.key === draggedKey);
+  const toIdx = state.categories.findIndex(c => c.key === targetKey);
+  if(fromIdx === -1 || toIdx === -1) return;
+  const [moved] = state.categories.splice(fromIdx, 1);
+  state.categories.splice(toIdx, 0, moved);
+  persist();
+  render();
+  renderManagePosts();
+}
+
+function reorderItem(catKey, draggedId, targetId){
+  if(draggedId === targetId) return;
+  const cat = state.categories.find(c => c.key === catKey);
+  if(!cat) return;
+  const fromIdx = cat.items.findIndex(i => i.id === draggedId);
+  const toIdx = cat.items.findIndex(i => i.id === targetId);
+  if(fromIdx === -1 || toIdx === -1) return;
+  const [moved] = cat.items.splice(fromIdx, 1);
+  cat.items.splice(toIdx, 0, moved);
+  persist();
+  render();
+  renderManagePosts();
+}
+
+function renderManagePosts(){
+  const wrap = document.getElementById('manageCatsWrap');
+  wrap.innerHTML = '';
+  state.categories.forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'manage-cat';
+    catDiv.draggable = true;
+    catDiv.dataset.catKey = cat.key;
+    catDiv.addEventListener('dragstart', e => {
+      dragCatKey = cat.key;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', cat.key);
+      catDiv.classList.add('dragging');
+    });
+    catDiv.addEventListener('dragend', () => catDiv.classList.remove('dragging'));
+    catDiv.addEventListener('dragenter', e => {
+      // Nogle browsere (bl.a. Firefox) kræver at både dragenter og dragover
+      // annulleres, for konsekvent at tillade drop og undgå browserens
+      // standardhandling (fx forsøg på navigation).
+      if(dragCatKey === null) return;
+      e.preventDefault();
+    });
+    catDiv.addEventListener('dragover', e => {
+      if(dragCatKey === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      catDiv.classList.add('drag-over');
+    });
+    catDiv.addEventListener('dragleave', () => catDiv.classList.remove('drag-over'));
+    catDiv.addEventListener('drop', e => {
+      e.preventDefault();
+      catDiv.classList.remove('drag-over');
+      if(dragCatKey){ reorderCategory(dragCatKey, cat.key); }
+      dragCatKey = null;
+    });
+
+    const head = document.createElement('div');
+    head.className = 'manage-cat-head';
+    const catHandle = document.createElement('span');
+    catHandle.className = 'drag-handle';
+    catHandle.textContent = '⠿';
+    catHandle.title = 'Træk for at flytte kategorien';
+    head.appendChild(catHandle);
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = cat.name;
+    nameInput.onchange = () => { cat.name = nameInput.value.trim() || cat.name; persist(); render(); };
+    head.appendChild(nameInput);
+    const delCatBtn = document.createElement('button');
+    delCatBtn.className = 'danger small';
+    delCatBtn.textContent = 'Slet kategori';
+    delCatBtn.onclick = () => deleteCategory(cat.key);
+    head.appendChild(delCatBtn);
+    catDiv.appendChild(head);
+
+    const itemsWrap = document.createElement('div');
+    itemsWrap.className = 'manage-items';
+    cat.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'manage-item-row';
+      row.draggable = true;
+      row.dataset.itemId = item.id;
+      row.addEventListener('dragstart', e => {
+        e.stopPropagation();
+        dragItem = { catKey: cat.key, itemId: item.id };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.id);
+        row.classList.add('dragging');
+      });
+      row.addEventListener('dragend', e => { e.stopPropagation(); row.classList.remove('dragging'); });
+      row.addEventListener('dragenter', e => {
+        if(!dragItem || dragItem.catKey !== cat.key) return;
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      row.addEventListener('dragover', e => {
+        if(!dragItem || dragItem.catKey !== cat.key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+        row.classList.add('drag-over');
+      });
+      row.addEventListener('dragleave', e => { e.stopPropagation(); row.classList.remove('drag-over'); });
+      row.addEventListener('drop', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        row.classList.remove('drag-over');
+        if(dragItem && dragItem.catKey === cat.key){ reorderItem(cat.key, dragItem.itemId, item.id); }
+        dragItem = null;
+      });
+      const itemHandle = document.createElement('span');
+      itemHandle.className = 'drag-handle';
+      itemHandle.textContent = '⠿';
+      itemHandle.title = 'Træk for at flytte posten';
+      row.appendChild(itemHandle);
+      const fieldsWrap = document.createElement('div');
+      fieldsWrap.className = 'manage-item-fields';
+      const lblInput = document.createElement('input');
+      lblInput.type = 'text';
+      lblInput.className = 'mi-label';
+      lblInput.value = item.label;
+      lblInput.placeholder = 'Postens navn';
+      lblInput.onchange = () => { item.label = lblInput.value.trim() || item.label; persist(); render(); };
+      fieldsWrap.appendChild(lblInput);
+      const descInput = document.createElement('input');
+      descInput.type = 'text';
+      descInput.className = 'mi-desc';
+      descInput.value = item.desc || '';
+      descInput.placeholder = 'Undertekst (valgfrit)';
+      descInput.onchange = () => { item.desc = descInput.value.trim(); persist(); render(); };
+      fieldsWrap.appendChild(descInput);
+      row.appendChild(fieldsWrap);
+      const delBtn = document.createElement('button');
+      delBtn.className = 'danger small';
+      delBtn.textContent = 'Slet';
+      delBtn.onclick = () => deleteItem(cat.key, item.id);
+      row.appendChild(delBtn);
+      itemsWrap.appendChild(row);
+    });
+    catDiv.appendChild(itemsWrap);
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-item-row';
+    const addFieldsWrap = document.createElement('div');
+    addFieldsWrap.className = 'add-item-fields';
+    const newLabel = document.createElement('input');
+    newLabel.type = 'text';
+    newLabel.className = 'mi-label';
+    newLabel.placeholder = 'Ny post, fx Balloner';
+    addFieldsWrap.appendChild(newLabel);
+    const newDesc = document.createElement('input');
+    newDesc.type = 'text';
+    newDesc.className = 'mi-desc';
+    newDesc.placeholder = 'Undertekst (valgfrit)';
+    addFieldsWrap.appendChild(newDesc);
+    const newDef = document.createElement('input');
+    newDef.type = 'text';
+    newDef.inputMode = 'numeric';
+    newDef.className = 'money-input';
+    newDef.placeholder = 'Forventet pris';
+    bindMoneyInput(newDef);
+    const addBtn = document.createElement('button');
+    addBtn.className = 'ghost small';
+    addBtn.textContent = '+ Tilføj post';
+    addBtn.onclick = () => {
+      const label = newLabel.value.trim();
+      if(!label){ alert('Skriv et navn på posten.'); return; }
+      addItem(cat.key, label, parseMoneyInput(newDef.value), newDesc.value.trim());
+    };
+    addRow.appendChild(addFieldsWrap);
+    addRow.appendChild(newDef);
+    addRow.appendChild(addBtn);
+    catDiv.appendChild(addRow);
+
+    wrap.appendChild(catDiv);
+  });
+}
+
+function openManagePosts(){
+  renderManagePosts();
+  document.getElementById('postsOverlay').classList.add('open');
+}
+function closeManagePosts(){
+  document.getElementById('postsOverlay').classList.remove('open');
+}
+
+function addCategory(){
+  const input = document.getElementById('newCatName');
+  const name = input.value.trim();
+  if(!name){ alert('Skriv et navn på kategorien.'); return; }
+  state.categories.push({ key: catKeyUid(), name, items: [] });
+  input.value = '';
+  persist();
+  render();
+  renderManagePosts();
+}
+
+function deleteCategory(catKey){
+  const cat = state.categories.find(c => c.key === catKey);
+  if(!cat) return;
+  if(!confirm(`Slet kategorien "${cat.name}" og alle dens poster? Dette fjerner dem fra jeres eget budget og alle tilbud.`)) return;
+  cat.items.forEach(item => removeItemFromState(item.id));
+  state.categories = state.categories.filter(c => c.key !== catKey);
+  persist();
+  render();
+  renderManagePosts();
+}
+
+function addItem(catKey, label, def, desc){
+  const cat = state.categories.find(c => c.key === catKey);
+  if(!cat) return;
+  const id = itemIdUid(catKey);
+  const newItem = { id, label, def };
+  if(desc) newItem.desc = desc;
+  cat.items.push(newItem);
+  state.ownBudget[id] = def;
+  state.offers.forEach(o => { o.items[id] = null; });
+  persist();
+  render();
+  renderManagePosts();
+}
+
+function deleteItem(catKey, itemId){
+  const cat = state.categories.find(c => c.key === catKey);
+  if(!cat) return;
+  if(!confirm('Slet denne post? Den fjernes fra jeres eget budget og alle tilbud.')) return;
+  cat.items = cat.items.filter(i => i.id !== itemId);
+  removeItemFromState(itemId);
+  persist();
+  render();
+  renderManagePosts();
+}
+
+/* ===================== Utils ===================== */
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ===================== Event wiring ===================== */
+document.getElementById('btnAddOffer').onclick = openAddOffer;
+document.getElementById('btnAddOfferEmpty').onclick = openAddOffer;
+document.getElementById('btnCancel').onclick = closeModal;
+document.getElementById('btnSaveOffer').onclick = saveOfferFromModal;
+document.getElementById('btnDelete').onclick = deleteOffer;
+document.getElementById('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
+
+document.getElementById('btnManagePosts').onclick = openManagePosts;
+document.getElementById('btnClosePosts').onclick = closeManagePosts;
+document.getElementById('btnAddCategory').onclick = addCategory;
+document.getElementById('postsOverlay').addEventListener('click', e => { if(e.target.id === 'postsOverlay') closeManagePosts(); });
+
+const frameTargetEl = document.getElementById('frameTarget');
+bindMoneyInput(frameTargetEl);
+frameTargetEl.addEventListener('change', () => {
+  state.frame.target = parseMoneyInput(frameTargetEl.value);
+  persist();
+  render();
+});
+
+document.getElementById('guestCount').addEventListener('change', e => {
+  state.guestCount = Math.max(0, Number(e.target.value || 0));
+  persist();
+  render();
+});
+
+/* ===================== Init ===================== */
+loadState();
+</script>
+</body>
+</html>
