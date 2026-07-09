@@ -711,14 +711,14 @@
 
     <div class="frame-row">
       <div class="frame-card">
-        <label>Ønsket budget</label>
+        <label for="frameTarget">Ønsket budget</label>
         <div class="rng">
           <input type="text" inputmode="numeric" class="money-input" id="frameTarget">
           <span>kr.</span>
         </div>
       </div>
       <div class="frame-card">
-        <label>Antal gæster</label>
+        <label for="guestCount">Antal gæster</label>
         <div class="rng">
           <input type="number" step="1" min="0" id="guestCount">
           <span>gæster</span>
@@ -737,11 +737,11 @@
 
 <div class="compare-controls" id="compareControls" style="display:none;">
   <div class="grp">
-    <label>Sammenlign med:</label>
+    <label for="selA">Sammenlign med:</label>
     <select id="selA"></select>
   </div>
   <div class="grp">
-    <label>og</label>
+    <label for="selB">og</label>
     <select id="selB"></select>
   </div>
 </div>
@@ -768,11 +768,11 @@
     <div class="modal-sub">Udfyld kun de poster stedet/leverandøren rent faktisk tilbyder. Tomme felter arver automatisk prisen fra jeres eget forventede budget.</div>
 
     <div class="field">
-      <label>Navn på sted/leverandør</label>
+      <label for="fName">Navn på sted/leverandør</label>
       <input type="text" id="fName" placeholder="Fx Kragerup Gods">
     </div>
     <div class="field">
-      <label>Noter (valgfrit)</label>
+      <label for="fNotes">Noter (valgfrit)</label>
       <textarea id="fNotes" placeholder="Fx tilbudsnummer, vilkår, kontaktperson..."></textarea>
     </div>
 
