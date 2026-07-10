@@ -352,11 +352,27 @@
     align-items:center;
   }
   .own-display{display:inline-flex;align-items:center;gap:6px;}
+  .own-value-wrap{display:flex;flex-direction:column;}
   .own-value{font-weight:500;}
   td.offer-cell{white-space:nowrap;}
   .offer-cell-inner{display:flex;align-items:center;}
+  .cell-value-wrap{display:flex;flex-direction:column;}
   .cell-value{font-weight:500;}
   .cell-value.inherited{color:var(--muted);font-style:italic;font-weight:400;}
+  /* Kuvertpris: lille undertekst med pris pr. gæst, vist under totalen */
+  .unit-price{
+    display:block;
+    font-size:.72rem;
+    color:var(--muted);
+    font-weight:400;
+    margin-top:1px;
+    white-space:nowrap;
+  }
+  .unit-suffix{
+    font-size:.78rem;
+    color:var(--muted);
+    margin-left:4px;
+  }
 
   tfoot tr td{line-height:1.25;}
   tfoot tr.subtotal-row td{
@@ -580,6 +596,21 @@
     color:var(--muted);
     background:#fff;
   }
+  .mi-perguest{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:.78rem;
+    color:var(--sage-700);
+    margin-top:2px;
+    cursor:pointer;
+  }
+  .mi-perguest input[type=checkbox]{
+    width:14px;
+    height:14px;
+    accent-color:var(--sage-600);
+    cursor:pointer;
+  }
   .add-item-row{
     display:flex;
     gap:8px;
@@ -630,7 +661,8 @@
   }
   .mobile-item-row .money-input{width:130px;}
   .mobile-col-name{color:var(--muted);flex:none;}
-  .mobile-val{font-weight:500;display:inline-flex;align-items:center;}
+  .mobile-val{font-weight:500;display:flex;flex-direction:column;align-items:flex-end;}
+  .mobile-val .mval-main{display:inline-flex;align-items:center;}
   .mobile-val.inherited{color:var(--muted);font-style:italic;font-weight:400;}
   .mobile-cat-subtotal{
     margin-top:10px;
@@ -1138,31 +1170,46 @@ function bindMoneyInput(el){
   });
 }
 
+function itemById(itemId){
+  return allItems(state).find(i => i.id === itemId);
+}
+// Kuvertpris-poster gemmes som en pris PR. GÆST (både i eget budget og i
+// tilbud); guestMultiplier() ganger den rå pris op til det faktiske,
+// budgetterede beløb, som bruges alle steder hvor der regnes/vises totaler.
+function guestMultiplier(item){
+  return (item && item.perGuest) ? Math.max(0, Number(state.guestCount) || 0) : 1;
+}
 function effectiveValue(offer, itemId){
   const v = offer.items[itemId];
   return (v === null || v === undefined || v === '') ? state.ownBudget[itemId] : v;
+}
+function displayValue(offer, itemId){
+  return Number(effectiveValue(offer, itemId) || 0) * guestMultiplier(itemById(itemId));
+}
+function ownDisplayValue(itemId){
+  return Number(state.ownBudget[itemId] || 0) * guestMultiplier(itemById(itemId));
 }
 function isInherited(offer, itemId){
   const v = offer.items[itemId];
   return (v === null || v === undefined || v === '');
 }
 function offerTotal(offer){
-  return allItems(state).reduce((sum,i) => sum + Number(effectiveValue(offer, i.id) || 0), 0);
+  return allItems(state).reduce((sum,i) => sum + displayValue(offer, i.id), 0);
 }
 function offerProvidedPart(offer){
-  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum : sum + Number(offer.items[i.id] || 0), 0);
+  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum : sum + Number(offer.items[i.id] || 0) * guestMultiplier(i), 0);
 }
 function offerOwnPart(offer){
-  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum + Number(state.ownBudget[i.id] || 0) : sum, 0);
+  return allItems(state).reduce((sum,i) => isInherited(offer,i.id) ? sum + Number(state.ownBudget[i.id] || 0) * guestMultiplier(i) : sum, 0);
 }
 function ownTotal(){
-  return allItems(state).reduce((sum,i) => sum + Number(state.ownBudget[i.id] || 0), 0);
+  return allItems(state).reduce((sum,i) => sum + ownDisplayValue(i.id), 0);
 }
 function categoryOwnSubtotal(cat){
-  return cat.items.reduce((sum,i) => sum + Number(state.ownBudget[i.id] || 0), 0);
+  return cat.items.reduce((sum,i) => sum + ownDisplayValue(i.id), 0);
 }
 function categoryOfferSubtotal(cat, offer){
-  return cat.items.reduce((sum,i) => sum + Number(effectiveValue(offer, i.id) || 0), 0);
+  return cat.items.reduce((sum,i) => sum + displayValue(offer, i.id), 0);
 }
 function getOffer(id){ return state.offers.find(o => o.id === id); }
 function uid(){ return 'o' + Math.random().toString(36).slice(2,9); }
@@ -1282,15 +1329,17 @@ function renderTable(){
       html += '<tr class="item-row">';
       html += `<td class="item-label"><span class="item-label-inner cell-vcenter"><span class="item-label-text">${escapeHtml(item.label)}</span><span class="item-desc">${item.desc ? escapeHtml(item.desc) : '&nbsp;'}</span></span></td>`;
       if(editingOwnItem === item.id){
-        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}"></span></td>`;
+        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}">${item.perGuest ? '<span class="unit-suffix">/gæst</span>' : ''}</span></td>`;
       } else {
-        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><span class="own-display"><span class="own-value">${kr(state.ownBudget[item.id])}</span><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button></span></span></td>`;
+        const ownSub = item.perGuest ? `<span class="unit-price">${kr(state.ownBudget[item.id])}/gæst</span>` : '';
+        html += `<td class="own-cell"><span class="cell-center cell-vcenter"><span class="own-display"><span class="own-value-wrap"><span class="own-value">${kr(ownDisplayValue(item.id))}</span>${ownSub}</span><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button></span></span></td>`;
       }
       cols.forEach(o => {
         const val = effectiveValue(o, item.id);
         const inh = isInherited(o, item.id);
+        const sub = item.perGuest ? `<span class="unit-price">${kr(val)}/gæst</span>` : '';
         html += `<td class="offer-cell"><span class="offer-cell-inner cell-vcenter">
-          <span class="cell-value ${inh ? 'inherited' : ''}">${kr(val)}</span>
+          <span class="cell-value-wrap"><span class="cell-value ${inh ? 'inherited' : ''}">${kr(displayValue(o, item.id))}</span>${sub}</span>
         </span></td>`;
       });
       html += '</tr>';
@@ -1338,14 +1387,15 @@ function renderMobileCards(cols){
     cat.items.forEach(item => {
       html += `<div class="mobile-item"><div class="mobile-item-label">${escapeHtml(item.label)}${item.desc ? `<span class="item-desc">${escapeHtml(item.desc)}</span>` : ''}</div>`;
       if(editingOwnItem === item.id){
-        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}"></div>`;
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><input type="text" inputmode="numeric" class="money-input own-edit-input" value="${fmtInt(state.ownBudget[item.id])}" data-item="${item.id}">${item.perGuest ? '<span class="unit-suffix">/gæst</span>' : ''}</div>`;
       } else {
-        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><span class="mobile-val"><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button>${kr(state.ownBudget[item.id])}</span></div>`;
+        const ownSub = item.perGuest ? `<span class="unit-price">${kr(state.ownBudget[item.id])}/gæst</span>` : '';
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">Vores budget</span><span class="mobile-val"><span class="mval-main"><button class="pencil-btn" onclick="startEditOwn('${item.id}')" title="Redigér">✎</button>${kr(ownDisplayValue(item.id))}</span>${ownSub}</span></div>`;
       }
       cols.forEach(o => {
-        const val = effectiveValue(o, item.id);
         const inh = isInherited(o, item.id);
-        html += `<div class="mobile-item-row"><span class="mobile-col-name">${escapeHtml(o.name)}</span><span class="mobile-val ${inh ? 'inherited' : ''}">${kr(val)}</span></div>`;
+        const sub = item.perGuest ? `<span class="unit-price">${kr(effectiveValue(o, item.id))}/gæst</span>` : '';
+        html += `<div class="mobile-item-row"><span class="mobile-col-name">${escapeHtml(o.name)}</span><span class="mobile-val ${inh ? 'inherited' : ''}"><span class="mval-main">${kr(displayValue(o, item.id))}</span>${sub}</span></div>`;
       });
       html += `</div>`;
     });
@@ -1435,10 +1485,13 @@ function buildModalItems(existingItems){
       row.className = 'modal-item-row';
       const own = state.ownBudget[item.id];
       const existingVal = existingItems && existingItems[item.id] !== null && existingItems[item.id] !== undefined ? existingItems[item.id] : '';
+      const descBits = [];
+      if(item.desc) descBits.push(escapeHtml(item.desc));
+      if(item.perGuest) descBits.push('Pris pr. gæst');
       row.innerHTML = `
-        <span class="mlabel">${escapeHtml(item.label)}${item.desc ? `<span class="mdesc">${escapeHtml(item.desc)}</span>` : ''}</span>
+        <span class="mlabel">${escapeHtml(item.label)}${descBits.length ? `<span class="mdesc">${descBits.join(' · ')}</span>` : ''}</span>
         <input type="text" inputmode="numeric" class="money-input" placeholder="${fmtInt(own)}" data-item="${item.id}"
-          value="${existingVal !== '' ? fmtInt(existingVal) : ''}">
+          value="${existingVal !== '' ? fmtInt(existingVal) : ''}">${item.perGuest ? '<span class="unit-suffix">/gæst</span>' : ''}
       `;
       fs.appendChild(row);
       bindMoneyInput(row.querySelector('input'));
@@ -1654,6 +1707,15 @@ function renderManagePosts(){
       descInput.placeholder = 'Undertekst (valgfrit)';
       descInput.onchange = () => { item.desc = descInput.value.trim(); persist(); render(); };
       fieldsWrap.appendChild(descInput);
+      const perGuestLabel = document.createElement('label');
+      perGuestLabel.className = 'mi-perguest';
+      const perGuestCheckbox = document.createElement('input');
+      perGuestCheckbox.type = 'checkbox';
+      perGuestCheckbox.checked = !!item.perGuest;
+      perGuestCheckbox.onchange = () => { item.perGuest = perGuestCheckbox.checked; persist(); render(); };
+      perGuestLabel.appendChild(perGuestCheckbox);
+      perGuestLabel.appendChild(document.createTextNode(' Kuvertpris (× antal gæster)'));
+      fieldsWrap.appendChild(perGuestLabel);
       row.appendChild(fieldsWrap);
       const delBtn = document.createElement('button');
       delBtn.className = 'danger small';
@@ -1678,6 +1740,13 @@ function renderManagePosts(){
     newDesc.className = 'mi-desc';
     newDesc.placeholder = 'Undertekst (valgfrit)';
     addFieldsWrap.appendChild(newDesc);
+    const newPerGuestLabel = document.createElement('label');
+    newPerGuestLabel.className = 'mi-perguest';
+    const newPerGuest = document.createElement('input');
+    newPerGuest.type = 'checkbox';
+    newPerGuestLabel.appendChild(newPerGuest);
+    newPerGuestLabel.appendChild(document.createTextNode(' Kuvertpris (× antal gæster)'));
+    addFieldsWrap.appendChild(newPerGuestLabel);
     const newDef = document.createElement('input');
     newDef.type = 'text';
     newDef.inputMode = 'numeric';
@@ -1690,7 +1759,7 @@ function renderManagePosts(){
     addBtn.onclick = () => {
       const label = newLabel.value.trim();
       if(!label){ alert('Skriv et navn på posten.'); return; }
-      addItem(cat.key, label, parseMoneyInput(newDef.value), newDesc.value.trim());
+      addItem(cat.key, label, parseMoneyInput(newDef.value), newDesc.value.trim(), newPerGuest.checked);
     };
     addRow.appendChild(addFieldsWrap);
     addRow.appendChild(newDef);
@@ -1731,12 +1800,13 @@ function deleteCategory(catKey){
   renderManagePosts();
 }
 
-function addItem(catKey, label, def, desc){
+function addItem(catKey, label, def, desc, perGuest){
   const cat = state.categories.find(c => c.key === catKey);
   if(!cat) return;
   const id = itemIdUid(catKey);
   const newItem = { id, label, def };
   if(desc) newItem.desc = desc;
+  if(perGuest) newItem.perGuest = true;
   cat.items.push(newItem);
   state.ownBudget[id] = def;
   state.offers.forEach(o => { o.items[id] = null; });
