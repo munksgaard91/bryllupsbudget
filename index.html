@@ -39,7 +39,8 @@
     font-family:'Jost', sans-serif;
     font-weight:400;
     line-height:1.5;
-    padding-bottom:80px;
+    /* Plads i bunden så den faste totalbar aldrig dækker indhold */
+    padding-bottom:140px;
   }
   /* Delt bredde/margin-regel, så header, værktøjslinje, sammenlign-boks og
      tabellen altid har præcis samme venstre/højre kant. */
@@ -304,6 +305,12 @@
   }
   table.compare thead th .pencil-btn{color:#fff;opacity:.7;}
   table.compare thead th .pencil-btn:hover{opacity:1;}
+  table.compare thead th .coldates{
+    font-size:.7rem;
+    font-weight:400;
+    color:rgba(255,255,255,.65);
+    line-height:1.4;
+  }
 
   tr.cat-row td{
     background:var(--sage-100);
@@ -490,6 +497,13 @@
     background:#fff;
   }
   .field textarea{min-height:64px;resize:vertical;}
+  /* Kompakt, men rummelig nok til en liste på 2-20 datoer (én pr. linje) */
+  .field textarea.dates-input{
+    min-height:96px;
+    font-size:.85rem;
+    line-height:1.7;
+    font-family:'Jost',sans-serif;
+  }
   .modal fieldset{
     border:1px solid var(--line);
     border-radius:12px;
@@ -686,7 +700,53 @@
     padding-top:10px;
   }
   .mobile-offer-total{margin-top:16px;padding-top:14px;border-top:1px dashed var(--sage-200);}
+  .mobile-offer-dates{font-size:.72rem;color:var(--muted);margin-top:-4px;margin-bottom:8px;}
   .mobile-frame-diff{font-size:.8rem;color:var(--muted);margin-top:6px;}
+
+  /* Noter i kolonneheader (ⓘ-toggle) og mobil-totalkort */
+  .note-btn{
+    background:none;border:none;cursor:pointer;padding:0 2px;margin:0;
+    font-size:.85rem;line-height:1;opacity:.7;color:inherit;
+  }
+  .note-btn:hover{opacity:1;background:none;transform:none;}
+  .note-btn:active{transform:none;}
+  table.compare thead th .colnote{
+    font-size:.72rem;font-weight:400;font-style:italic;
+    color:rgba(255,255,255,.75);line-height:1.45;margin-top:2px;
+    max-width:340px;white-space:normal;
+  }
+  .mobile-offer-note{
+    font-size:.75rem;font-style:italic;color:var(--muted);
+    line-height:1.45;margin:2px 0 8px;
+  }
+
+  /* ---------- Fast totalbar i bunden ---------- */
+  .sticky-totals{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--white);
+    border-top:1px solid var(--sage-200);
+    box-shadow:0 -4px 14px rgba(60,70,50,.08);
+  }
+  .sticky-totals-inner{
+    max-width:1180px;margin:0 auto;padding:10px 24px;
+    display:flex;gap:26px;align-items:center;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  .st-entry{flex:none;display:flex;flex-direction:column;gap:1px;}
+  .st-name{
+    font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--muted);font-weight:500;white-space:nowrap;
+  }
+  .st-name.own{color:var(--sage-700);}
+  .st-value{
+    font-weight:600;font-size:1.02rem;color:var(--sage-900);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .st-diff{font-size:.7rem;white-space:nowrap;}
+  @media (max-width:480px){
+    .sticky-totals-inner{padding:8px 16px;gap:18px;}
+    .st-value{font-size:.95rem;}
+  }
 
   @media (max-width:780px){
     #tableDesktopWrap{display:none;}
@@ -764,6 +824,7 @@
   <div class="left">
     <button id="btnAddOffer">+ Tilføj tilbud</button>
     <button class="ghost" id="btnManagePosts">Tilpas poster</button>
+    <button class="ghost" id="btnExportCsv">Eksportér CSV</button>
   </div>
 </div>
 
@@ -793,6 +854,10 @@
   <div class="chips" id="chips"></div>
 </div>
 
+<div class="sticky-totals" id="stickyTotals" style="display:none;">
+  <div class="sticky-totals-inner" id="stickyTotalsInner"></div>
+</div>
+
 <!-- ================= Modal ================= -->
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -802,6 +867,10 @@
     <div class="field">
       <label for="fName">Navn på sted/leverandør</label>
       <input type="text" id="fName" placeholder="Fx Kragerup Gods">
+    </div>
+    <div class="field">
+      <label for="fDates">Tilgængelige datoer (valgfrit)</label>
+      <textarea id="fDates" class="dates-input" placeholder="Én dato pr. linje, fx:&#10;24.-25. juli 2027&#10;7.-8. august 2027"></textarea>
     </div>
     <div class="field">
       <label for="fNotes">Noter (valgfrit)</label>
@@ -983,7 +1052,6 @@ function buildDefaultState(){
       {
         id:'kragerup',
         name:'Kragerup Gods',
-        link:'https://kragerup.dk',
         notes:'Tilbud 249502 (09-06-2026, ikke bindende). 58 gæster, 24.–25. juli 2027, ekskl. værelser (gæster betaler selv). Softbar er kun vin/øl/vand, ikke spiritus. Pris på cocktailbar og vielse-opsætning ikke oplyst endnu — antaget lig vores eget budget indtil videre.',
         items: Object.assign(emptyOfferItems(categories), {
           venue_package: 138330,
@@ -996,7 +1064,6 @@ function buildDefaultState(){
       {
         id:'lorem1',
         name:'Lorem Ipsum Gods',
-        link:'https://example.com/lorem-ipsum-gods',
         notes:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         items: Object.assign(emptyOfferItems(categories), {
           venue_package: 165000,
@@ -1010,7 +1077,6 @@ function buildDefaultState(){
       {
         id:'lorem2',
         name:'Dolor Sit Manor',
-        link:'https://example.com/dolor-sit-manor',
         notes:'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
         items: Object.assign(emptyOfferItems(categories), {
           venue_package: 121000,
@@ -1088,8 +1154,12 @@ async function loadState(){
         state = cloud;
         saveLocal(state);
         render();
+        setSyncStatus('ok');
+      } else {
+        // Lokal state er nyere end skyen (fx redigeringer lavet offline).
+        // Uden dette push ville de først nå skyen ved næste manuelle ændring.
+        await pushCloud(state);
       }
-      setSyncStatus('ok');
     } else {
       if(!local){ state = buildDefaultState(); render(); }
       setSyncStatus('error');
@@ -1110,7 +1180,10 @@ async function pollCloud(){
   // Ellers ville et indkommende cloud-render kunne nulstille ugemte indtastninger.
   const overlayOpen = document.getElementById('overlay').classList.contains('open');
   const postsOverlayOpen = document.getElementById('postsOverlay').classList.contains('open');
-  if(editingOwnItem || overlayOpen || postsOverlayOpen) return;
+  // pendingSave: en lokal ændring venter på (eller er midt i) at blive
+  // skubbet til skyen. Henter poll'en cloud-state ind nu, ville den lokale
+  // ændring blive overskrevet og den gamle cloud-state pushet i stedet.
+  if(editingOwnItem || overlayOpen || postsOverlayOpen || pendingSave) return;
   try{
     const res = await fetch(`${SYNC.baseUrl}/${SYNC.binId}/latest`, { headers:{ 'X-Master-Key': SYNC.apiKey }});
     if(!res.ok) return;
@@ -1126,12 +1199,14 @@ async function pollCloud(){
 }
 
 let saveTimer = null;
+let pendingSave = false; // true fra en ændring laves, til den er skubbet til skyen
 function persist(){
   state.meta.updatedAt = new Date().toISOString();
   saveLocal(state);
   clearTimeout(saveTimer);
   if(isSyncConfigured()){
     setSyncStatus('saving');
+    pendingSave = true;
     saveTimer = setTimeout(() => pushCloud(state), 600);
   }
 }
@@ -1145,6 +1220,7 @@ async function pushCloud(s){
     });
     setSyncStatus(res.ok ? 'ok' : 'error');
   }catch(e){ setSyncStatus('offline'); }
+  finally{ pendingSave = false; }
 }
 
 /* ===================== Tal-helpers ===================== */
@@ -1157,8 +1233,16 @@ function fmtInt(n){
   return n.toLocaleString('da-DK');
 }
 function parseMoneyInput(str){
-  const digits = String(str || '').replace(/\D/g,'');
-  return digits ? Number(digits) : 0;
+  // Budgettet regner i hele kroner. Et indsat beløb som "1.500,50" må dog
+  // ikke blive til 150050 — komma efterfulgt af 1-2 cifre (evt. "kr.")
+  // tolkes derfor som decimaler og afrundes til nærmeste hele krone.
+  let s = String(str || '').trim();
+  let dec = 0;
+  const m = s.match(/^(.*?),(\d{1,2})\s*(kr\.?)?\s*$/i);
+  if(m){ s = m[1]; dec = Number('0.' + m[2]); }
+  const digits = s.replace(/\D/g,'');
+  const base = digits ? Number(digits) : 0;
+  return Math.round(base + dec);
 }
 function bindMoneyInput(el){
   el.addEventListener('input', () => {
@@ -1224,6 +1308,7 @@ function render(){
   renderCompareControls();
   renderTable();
   renderChips();
+  renderStickyTotals();
 
   document.getElementById('emptyState').style.display = state.offers.length === 0 ? 'block' : 'none';
   document.getElementById('tableWrap').style.display = state.offers.length === 0 ? 'none' : 'block';
@@ -1277,6 +1362,13 @@ function renderCompareControls(){
 }
 
 let editingOwnItem = null;
+// Hvilke tilbuds noter er foldet ud (kun UI-tilstand, gemmes ikke)
+const openNotes = new Set();
+function toggleNote(offerId){
+  if(openNotes.has(offerId)) openNotes.delete(offerId);
+  else openNotes.add(offerId);
+  renderTable();
+}
 
 function visibleOwnEditInput(){
   return [...document.querySelectorAll('.own-edit-input')].find(el => el.offsetParent !== null) || document.querySelector('.own-edit-input');
@@ -1308,10 +1400,16 @@ function renderTable(){
   html += '<th class="col-item"></th>';
   html += '<th><div class="colhead"><span class="colname">Vores budget</span></div></th>';
   cols.forEach(o => {
+    const datesLine = o.dates ? o.dates.split(/\r?\n/).map(s => s.trim()).filter(Boolean).join(', ') : '';
+    const hasNote = !!(o.notes && o.notes.trim());
+    const noteOpen = hasNote && openNotes.has(o.id);
     html += `<th><div class="colhead">
       <span class="colname">${escapeHtml(o.name)}
         <button class="pencil-btn" onclick="openEditOffer('${o.id}')" title="Redigér">✎</button>
+        ${hasNote ? `<button class="note-btn" onclick="toggleNote('${o.id}')" title="${noteOpen ? 'Skjul noter' : 'Vis noter'}">ⓘ</button>` : ''}
       </span>
+      ${datesLine ? `<span class="coldates">${escapeHtml(datesLine)}</span>` : ''}
+      ${noteOpen ? `<span class="colnote">${escapeHtml(o.notes).replace(/\r?\n/g,'<br>')}</span>` : ''}
     </div></th>`;
   });
   html += '</tr></thead><tbody>';
@@ -1413,8 +1511,13 @@ function renderMobileCards(cols){
   html += `<div class="mobile-total-card"><div class="mobile-total-row grand"><span>Vores budget</span><span>${kr(ot)}</span></div>`;
   cols.forEach(o => {
     const t = offerTotal(o);
+    const datesLine = o.dates ? o.dates.split(/\r?\n/).map(s => s.trim()).filter(Boolean).join(', ') : '';
+    const hasNote = !!(o.notes && o.notes.trim());
+    const noteOpen = hasNote && openNotes.has(o.id);
     html += `<div class="mobile-offer-total">`;
-    html += `<div class="mobile-total-row" style="font-weight:600;color:var(--sage-900);"><span>${escapeHtml(o.name)}</span><span></span></div>`;
+    html += `<div class="mobile-total-row" style="font-weight:600;color:var(--sage-900);"><span>${escapeHtml(o.name)}${hasNote ? ` <button class="note-btn" onclick="toggleNote('${o.id}')" title="${noteOpen ? 'Skjul noter' : 'Vis noter'}">ⓘ</button>` : ''}</span><span></span></div>`;
+    if(datesLine){ html += `<div class="mobile-offer-dates">${escapeHtml(datesLine)}</div>`; }
+    if(noteOpen){ html += `<div class="mobile-offer-note">${escapeHtml(o.notes).replace(/\r?\n/g,'<br>')}</div>`; }
     html += `<div class="mobile-total-row"><span>Fra tilbuddet</span><span>${kr(offerProvidedPart(o))}</span></div>`;
     html += `<div class="mobile-total-row"><span>Fra eget budget (ikke oplyst)</span><span>${kr(offerOwnPart(o))}</span></div>`;
     html += `<div class="mobile-total-row grand"><span>Total</span><span>${kr(t)}</span></div>`;
@@ -1449,6 +1552,29 @@ function frameDiffText(total){
   if(Math.abs(d) <= 500) return `<span class="diff-tag neutral">= ca. som ønsket budget</span>`;
   if(d > 0) return `<span class="diff-tag bad">+ ${kr(d)} over ønsket budget</span>`;
   return `<span class="diff-tag good">− ${kr(Math.abs(d))} under ønsket budget</span>`;
+}
+/* Kort variant til den faste totalbar, hvor pladsen er trang */
+function frameDiffShort(total){
+  const d = total - state.frame.target;
+  if(Math.abs(d) <= 500) return `<span class="diff-tag neutral">≈ ønsket</span>`;
+  if(d > 0) return `<span class="diff-tag bad">+${kr(d)}</span>`;
+  return `<span class="diff-tag good">−${kr(Math.abs(d))}</span>`;
+}
+
+/* Fast bar i bunden: eget budget + de aktive sammenlignings-kolonner,
+   så totalen og afvigelsen fra ønsket budget altid er synlig uden scroll. */
+function renderStickyTotals(){
+  const bar = document.getElementById('stickyTotals');
+  const inner = document.getElementById('stickyTotalsInner');
+  if(!state){ bar.style.display = 'none'; return; }
+  bar.style.display = 'block';
+  const ot = ownTotal();
+  let html = `<div class="st-entry"><span class="st-name own">Vores budget</span><span class="st-value">${kr(ot)}</span><span class="st-diff">${frameDiffShort(ot)}</span></div>`;
+  currentColumns().forEach(o => {
+    const t = offerTotal(o);
+    html += `<div class="st-entry"><span class="st-name">${escapeHtml(o.name)}</span><span class="st-value">${kr(t)}</span><span class="st-diff">${frameDiffShort(t)}</span></div>`;
+  });
+  inner.innerHTML = html;
 }
 
 function renderChips(){
@@ -1504,6 +1630,7 @@ function openAddOffer(){
   editingId = null;
   document.getElementById('modalTitle').textContent = 'Tilføj tilbud';
   document.getElementById('fName').value = '';
+  document.getElementById('fDates').value = '';
   document.getElementById('fNotes').value = '';
   document.getElementById('btnDelete').style.display = 'none';
   buildModalItems(null);
@@ -1516,6 +1643,7 @@ function openEditOffer(id){
   editingId = id;
   document.getElementById('modalTitle').textContent = 'Redigér tilbud';
   document.getElementById('fName').value = o.name;
+  document.getElementById('fDates').value = o.dates || '';
   document.getElementById('fNotes').value = o.notes || '';
   document.getElementById('btnDelete').style.display = 'inline-block';
   buildModalItems(o.items);
@@ -1529,6 +1657,7 @@ function closeModal(){
 function saveOfferFromModal(){
   const name = document.getElementById('fName').value.trim();
   if(!name){ alert('Skriv venligst et navn på stedet/leverandøren.'); return; }
+  const dates = document.getElementById('fDates').value.trim();
   const notes = document.getElementById('fNotes').value.trim();
   const items = {};
   document.querySelectorAll('#modalItemsWrap input').forEach(inp => {
@@ -1538,9 +1667,9 @@ function saveOfferFromModal(){
 
   if(editingId){
     const o = getOffer(editingId);
-    o.name = name; o.notes = notes; o.items = items;
+    o.name = name; o.dates = dates; o.notes = notes; o.items = items;
   } else {
-    const newOffer = { id: uid(), name, notes, items };
+    const newOffer = { id: uid(), name, dates, notes, items };
     state.offers.push(newOffer);
     if(state.offers.length === 1) state.compare.a = newOffer.id;
     else if(state.offers.length === 2) state.compare.b = newOffer.id;
@@ -1562,6 +1691,45 @@ function deleteOffer(){
 }
 
 /* ===================== Modal: tilpas poster ===================== */
+/* Slår kuvertpris til/fra på en post. Uden hjælp ville et eksisterende
+   totalbeløb pludselig blive tolket som pris pr. gæst (og ganget op med
+   gæsteantallet) — derfor tilbydes en omregning, der bevarer totalen.
+   Gælder både eget budget og alle indtastede tilbudsværdier for posten. */
+function togglePerGuest(item, checked){
+  const guests = Math.max(0, Number(state.guestCount) || 0);
+  const ownVal = Number(state.ownBudget[item.id]) || 0;
+  const hasValues = ownVal > 0 || state.offers.some(o => {
+    const v = o.items[item.id];
+    return v !== null && v !== undefined && v !== '' && Number(v) > 0;
+  });
+
+  if(guests > 0 && hasValues){
+    const msg = checked
+      ? `"${item.label}" bliver nu en kuvertpris (× ${guests} gæster).\n\n` +
+        `Skal de nuværende beløb omregnes til pris pr. gæst (divideres med ${guests}, afrundet til hele kroner)?\n\n` +
+        `OK = omregn beløbene\nAnnullér = behold tallene som de er (de tolkes fremover som pris pr. gæst)`
+      : `"${item.label}" er ikke længere en kuvertpris.\n\n` +
+        `Skal de nuværende priser pr. gæst omregnes til totalbeløb (ganges med ${guests}), så totalen bevares?\n\n` +
+        `OK = omregn beløbene\nAnnullér = behold tallene som de er (de tolkes fremover som totalbeløb)`;
+    if(confirm(msg)){
+      const conv = checked ? (v => Math.round(v / guests)) : (v => Math.round(v * guests));
+      state.ownBudget[item.id] = conv(ownVal);
+      state.offers.forEach(o => {
+        const v = o.items[item.id];
+        if(v !== null && v !== undefined && v !== ''){
+          o.items[item.id] = conv(Number(v) || 0);
+        }
+      });
+    }
+  }
+
+  if(checked) item.perGuest = true;
+  else delete item.perGuest;
+  persist();
+  render();
+  renderManagePosts();
+}
+
 function removeItemFromState(itemId){
   delete state.ownBudget[itemId];
   state.offers.forEach(o => { delete o.items[itemId]; });
@@ -1602,7 +1770,11 @@ function renderManagePosts(){
   state.categories.forEach(cat => {
     const catDiv = document.createElement('div');
     catDiv.className = 'manage-cat';
-    catDiv.draggable = true;
+    // draggable sættes kun midlertidigt via mousedown på drag-handlen (se
+    // nedenfor). Var hele rækken permanent draggable, ville mus-drag i
+    // tekstfelterne starte en flytning i stedet for tekstmarkering
+    // (bekræftet i både Chromium og Firefox).
+    catDiv.draggable = false;
     catDiv.dataset.catKey = cat.key;
     catDiv.addEventListener('dragstart', e => {
       dragCatKey = cat.key;
@@ -1610,7 +1782,7 @@ function renderManagePosts(){
       e.dataTransfer.setData('text/plain', cat.key);
       catDiv.classList.add('dragging');
     });
-    catDiv.addEventListener('dragend', () => catDiv.classList.remove('dragging'));
+    catDiv.addEventListener('dragend', () => { catDiv.classList.remove('dragging'); catDiv.draggable = false; });
     catDiv.addEventListener('dragenter', e => {
       // Nogle browsere (bl.a. Firefox) kræver at både dragenter og dragover
       // annulleres, for konsekvent at tillade drop og undgå browserens
@@ -1638,6 +1810,10 @@ function renderManagePosts(){
     catHandle.className = 'drag-handle';
     catHandle.textContent = '⠿';
     catHandle.title = 'Træk for at flytte kategorien';
+    catHandle.addEventListener('mousedown', () => { catDiv.draggable = true; });
+    // Hvis man slipper uden at et drag nåede at starte, skal rækken
+    // tilbage til ikke-draggable (dragend fyrer kun efter et reelt drag).
+    catDiv.addEventListener('mouseup', () => { catDiv.draggable = false; });
     head.appendChild(catHandle);
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
@@ -1656,7 +1832,9 @@ function renderManagePosts(){
     cat.items.forEach(item => {
       const row = document.createElement('div');
       row.className = 'manage-item-row';
-      row.draggable = true;
+      // Samme princip som kategorierne: draggable aktiveres kun fra handlen,
+      // så tekstmarkering og klik i inputs/checkbox aldrig kaprer musen.
+      row.draggable = false;
       row.dataset.itemId = item.id;
       row.addEventListener('dragstart', e => {
         e.stopPropagation();
@@ -1665,7 +1843,7 @@ function renderManagePosts(){
         e.dataTransfer.setData('text/plain', item.id);
         row.classList.add('dragging');
       });
-      row.addEventListener('dragend', e => { e.stopPropagation(); row.classList.remove('dragging'); });
+      row.addEventListener('dragend', e => { e.stopPropagation(); row.classList.remove('dragging'); row.draggable = false; });
       row.addEventListener('dragenter', e => {
         if(!dragItem || dragItem.catKey !== cat.key) return;
         e.preventDefault();
@@ -1690,6 +1868,8 @@ function renderManagePosts(){
       itemHandle.className = 'drag-handle';
       itemHandle.textContent = '⠿';
       itemHandle.title = 'Træk for at flytte posten';
+      itemHandle.addEventListener('mousedown', e => { e.stopPropagation(); row.draggable = true; });
+      row.addEventListener('mouseup', () => { row.draggable = false; });
       row.appendChild(itemHandle);
       const fieldsWrap = document.createElement('div');
       fieldsWrap.className = 'manage-item-fields';
@@ -1712,7 +1892,7 @@ function renderManagePosts(){
       const perGuestCheckbox = document.createElement('input');
       perGuestCheckbox.type = 'checkbox';
       perGuestCheckbox.checked = !!item.perGuest;
-      perGuestCheckbox.onchange = () => { item.perGuest = perGuestCheckbox.checked; persist(); render(); };
+      perGuestCheckbox.onchange = () => { togglePerGuest(item, perGuestCheckbox.checked); };
       perGuestLabel.appendChild(perGuestCheckbox);
       perGuestLabel.appendChild(document.createTextNode(' Kuvertpris (× antal gæster)'));
       fieldsWrap.appendChild(perGuestLabel);
@@ -1827,6 +2007,53 @@ function deleteItem(catKey, itemId){
 }
 
 /* ===================== Utils ===================== */
+/* CSV-eksport: eget budget + de (op til to) tilbud der er aktive i
+   sammenligningen. Semikolon-separeret med UTF-8 BOM, så dansk Excel
+   åbner filen korrekt med det samme. Beløb er de faktiske, budgetterede
+   totaler (kuvertpriser er ganget op med gæsteantallet). */
+function csvField(v){
+  const s = String(v ?? '');
+  return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function exportCsv(){
+  const cols = currentColumns();
+  const rows = [];
+  rows.push(['Kategori','Post','Vores budget', ...cols.map(o => o.name)]);
+  state.categories.forEach(cat => {
+    if(cat.items.length === 0) return;
+    cat.items.forEach(item => {
+      rows.push([
+        cat.name,
+        item.label + (item.perGuest ? ' (kuvertpris)' : ''),
+        ownDisplayValue(item.id),
+        ...cols.map(o => displayValue(o, item.id))
+      ]);
+    });
+    rows.push([cat.name, 'Subtotal', categoryOwnSubtotal(cat), ...cols.map(o => categoryOfferSubtotal(cat, o))]);
+  });
+  rows.push(['','Fra tilbuddet','', ...cols.map(o => offerProvidedPart(o))]);
+  rows.push(['','Fra eget budget (ikke oplyst)','', ...cols.map(o => offerOwnPart(o))]);
+  const ot = ownTotal();
+  rows.push(['','Total', ot, ...cols.map(o => offerTotal(o))]);
+  rows.push(['',`Ift. ønsket budget (${state.frame.target} kr.)`, ot - state.frame.target, ...cols.map(o => offerTotal(o) - state.frame.target)]);
+  rows.push([]);
+  rows.push(['Antal gæster', state.guestCount]);
+  cols.forEach(o => {
+    if(o.dates && o.dates.trim()) rows.push([`Datoer – ${o.name}`, o.dates.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).join(', ')]);
+    if(o.notes && o.notes.trim()) rows.push([`Noter – ${o.name}`, o.notes.replace(/\r?\n/g,' ')]);
+  });
+
+  const csv = '\ufeff' + rows.map(r => r.map(csvField).join(';')).join('\r\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bryllupsbudget_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -1841,9 +2068,18 @@ document.getElementById('btnDelete').onclick = deleteOffer;
 document.getElementById('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
 
 document.getElementById('btnManagePosts').onclick = openManagePosts;
+document.getElementById('btnExportCsv').onclick = exportCsv;
 document.getElementById('btnClosePosts').onclick = closeManagePosts;
 document.getElementById('btnAddCategory').onclick = addCategory;
 document.getElementById('postsOverlay').addEventListener('click', e => { if(e.target.id === 'postsOverlay') closeManagePosts(); });
+
+// Escape lukker en åben modal (inline-redigering af eget budget håndterer
+// selv Escape på input-niveau, og der er ingen modal åben i den situation).
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(document.getElementById('overlay').classList.contains('open')) closeModal();
+  if(document.getElementById('postsOverlay').classList.contains('open')) closeManagePosts();
+});
 
 const frameTargetEl = document.getElementById('frameTarget');
 bindMoneyInput(frameTargetEl);
