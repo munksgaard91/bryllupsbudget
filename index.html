@@ -455,6 +455,32 @@
   }
   .chip .chip-total{color:var(--muted);}
 
+  /* ---------- Afventer tilbud ---------- */
+  .pending-wrap{margin-top:18px;}
+  .pending-hint{margin:-6px 0 12px;font-size:.82rem;color:var(--muted);}
+  .chip.pending{border-style:dashed;background:transparent;flex-wrap:wrap;border-radius:16px;}
+  .chip .chip-date{color:var(--muted);font-size:.78rem;white-space:nowrap;}
+  .chip .chip-note{color:var(--muted);font-size:.78rem;font-style:italic;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .chip .chip-convert{
+    background:none;border:none;cursor:pointer;padding:2px 6px;margin:0;
+    font-size:.76rem;color:var(--sage-700);text-decoration:underline;
+    white-space:nowrap;
+  }
+  .chip .chip-convert:hover{color:var(--sage-900);background:none;transform:none;}
+  .chip .chip-convert:active{transform:none;}
+  .pending-add{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .pending-add input{
+    border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;font:inherit;font-size:.85rem;
+    background:var(--white);min-width:0;
+  }
+  .pending-add #pendingName{flex:1 1 200px;}
+  .pending-add #pendingDate{flex:0 1 140px;}
+  .pending-add #pendingNote{flex:1 1 180px;}
+  @media (max-width:640px){
+    .pending-add input{flex:1 1 100%;}
+  }
+
   /* ---------- Modal ---------- */
   .overlay{
     position:fixed;inset:0;
@@ -854,6 +880,18 @@
   <div class="chips" id="chips"></div>
 </div>
 
+<div class="all-offers pending-wrap" id="pendingWrap">
+  <h3>Afventer tilbud</h3>
+  <p class="pending-hint">Steder/leverandører I har skrevet til, men endnu ikke har fået tilbud fra.</p>
+  <div class="chips" id="pendingChips"></div>
+  <div class="pending-add">
+    <input type="text" id="pendingName" placeholder="Navn (fx Holckenhavn Slot)">
+    <input type="text" id="pendingDate" placeholder="Kontaktet (fx 12/7)">
+    <input type="text" id="pendingNote" placeholder="Note (valgfri)">
+    <button class="ghost" id="btnAddPending">+ Tilføj</button>
+  </div>
+</div>
+
 <div class="sticky-totals" id="stickyTotals" style="display:none;">
   <div class="sticky-totals-inner" id="stickyTotalsInner"></div>
 </div>
@@ -1021,6 +1059,11 @@ function normalizeState(s){
   if(!s.compare || typeof s.compare !== 'object'){
     s.compare = {};
   }
+
+  // "Afventer tilbud": steder/leverandører vi har skrevet til, men som
+  // endnu ikke har svaret med et tilbud. Rent overbliks-data.
+  if(!Array.isArray(s.pending)) s.pending = [];
+  s.pending = s.pending.filter(p => p && typeof p === 'object' && typeof p.name === 'string' && p.name.trim());
   if(!s.meta || typeof s.meta !== 'object'){
     s.meta = { updatedAt: new Date().toISOString() };
   }
@@ -1088,7 +1131,8 @@ function buildDefaultState(){
         })
       },
     ],
-    compare:{ a:'kragerup', b:'lorem1' }
+    compare:{ a:'kragerup', b:'lorem1' },
+    pending: []
   };
 }
 
@@ -1131,7 +1175,7 @@ async function loadState(){
   if(local){ state = normalizeState(local); render(); }
 
   if(!isSyncConfigured()){
-    if(!local){ state = buildDefaultState(); saveLocal(state); render(); }
+    if(!local){ state = normalizeState(buildDefaultState()); saveLocal(state); render(); }
     setSyncStatus('local-only');
     return;
   }
@@ -1146,7 +1190,7 @@ async function loadState(){
       let cloud = data.record;
       if(!cloud || !cloud.meta){
         // Tom / ny bin -> seed med eksempeldata
-        cloud = buildDefaultState();
+        cloud = normalizeState(buildDefaultState());
         await pushCloud(cloud);
       }
       cloud = normalizeState(cloud);
@@ -1161,11 +1205,11 @@ async function loadState(){
         await pushCloud(state);
       }
     } else {
-      if(!local){ state = buildDefaultState(); render(); }
+      if(!local){ state = normalizeState(buildDefaultState()); render(); }
       setSyncStatus('error');
     }
   }catch(e){
-    if(!local){ state = buildDefaultState(); render(); }
+    if(!local){ state = normalizeState(buildDefaultState()); render(); }
     setSyncStatus('offline');
   }
 
@@ -1308,6 +1352,7 @@ function render(){
   renderCompareControls();
   renderTable();
   renderChips();
+  renderPending();
   renderStickyTotals();
 
   document.getElementById('emptyState').style.display = state.offers.length === 0 ? 'block' : 'none';
@@ -1594,6 +1639,72 @@ function renderChips(){
   });
 }
 
+/* ===================== Afventer tilbud ===================== */
+/* Overbliksliste over kontaktede steder/leverandører uden svar endnu.
+   "Opret tilbud" åbner tilbuds-modalen med navn/note udfyldt, og fjerner
+   posten fra ventelisten når tilbuddet gemmes. */
+let pendingConvertId = null;
+
+function renderPending(){
+  const wrap = document.getElementById('pendingChips');
+  wrap.innerHTML = '';
+  state.pending.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'chip pending';
+    let inner = `<span>${escapeHtml(p.name)}</span>`;
+    if(p.date) inner += `<span class="chip-date">skrevet ${escapeHtml(p.date)}</span>`;
+    if(p.note) inner += `<span class="chip-note" title="${escapeHtml(p.note)}">${escapeHtml(p.note)}</span>`;
+    div.innerHTML = inner;
+
+    const convertBtn = document.createElement('button');
+    convertBtn.className = 'chip-convert';
+    convertBtn.textContent = 'Opret tilbud';
+    convertBtn.title = 'Vi har fået tilbuddet — indtast det';
+    convertBtn.onclick = () => convertPending(p.id);
+    div.appendChild(convertBtn);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'pencil-btn';
+    removeBtn.textContent = '✕';
+    removeBtn.title = 'Fjern fra listen';
+    removeBtn.onclick = () => removePending(p.id);
+    div.appendChild(removeBtn);
+
+    wrap.appendChild(div);
+  });
+}
+
+function addPending(){
+  const nameEl = document.getElementById('pendingName');
+  const dateEl = document.getElementById('pendingDate');
+  const noteEl = document.getElementById('pendingNote');
+  const name = nameEl.value.trim();
+  if(!name){ alert('Skriv et navn på stedet/leverandøren.'); nameEl.focus(); return; }
+  state.pending.push({ id: uid(), name, date: dateEl.value.trim(), note: noteEl.value.trim() });
+  nameEl.value = ''; dateEl.value = ''; noteEl.value = '';
+  nameEl.focus();
+  persist();
+  renderPending();
+}
+
+function removePending(id){
+  const p = state.pending.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(`Fjern "${p.name}" fra Afventer tilbud?`)) return;
+  state.pending = state.pending.filter(x => x.id !== id);
+  persist();
+  renderPending();
+}
+
+function convertPending(id){
+  const p = state.pending.find(x => x.id === id);
+  if(!p) return;
+  pendingConvertId = id;
+  openAddOffer();
+  document.getElementById('fName').value = p.name;
+  if(p.note) document.getElementById('fNotes').value = p.note;
+}
+
 /* ===================== Modal: tilføj/redigér tilbud ===================== */
 let editingId = null;
 
@@ -1652,6 +1763,7 @@ function openEditOffer(id){
 
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
+  pendingConvertId = null;
 }
 
 function saveOfferFromModal(){
@@ -1673,6 +1785,11 @@ function saveOfferFromModal(){
     state.offers.push(newOffer);
     if(state.offers.length === 1) state.compare.a = newOffer.id;
     else if(state.offers.length === 2) state.compare.b = newOffer.id;
+    // Kom tilbuddet fra ventelisten, fjernes posten dér nu
+    if(pendingConvertId){
+      state.pending = state.pending.filter(x => x.id !== pendingConvertId);
+      pendingConvertId = null;
+    }
   }
   persist();
   closeModal();
@@ -2042,6 +2159,11 @@ function exportCsv(){
     if(o.dates && o.dates.trim()) rows.push([`Datoer – ${o.name}`, o.dates.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).join(', ')]);
     if(o.notes && o.notes.trim()) rows.push([`Noter – ${o.name}`, o.notes.replace(/\r?\n/g,' ')]);
   });
+  if(state.pending.length){
+    rows.push([]);
+    rows.push(['Afventer tilbud','Kontaktet','Note']);
+    state.pending.forEach(p => rows.push([p.name, p.date || '', p.note || '']));
+  }
 
   const csv = '\ufeff' + rows.map(r => r.map(csvField).join(';')).join('\r\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
@@ -2069,6 +2191,10 @@ document.getElementById('overlay').addEventListener('click', e => { if(e.target.
 
 document.getElementById('btnManagePosts').onclick = openManagePosts;
 document.getElementById('btnExportCsv').onclick = exportCsv;
+document.getElementById('btnAddPending').onclick = addPending;
+['pendingName','pendingDate','pendingNote'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key === 'Enter') addPending(); });
+});
 document.getElementById('btnClosePosts').onclick = closeManagePosts;
 document.getElementById('btnAddCategory').onclick = addCategory;
 document.getElementById('postsOverlay').addEventListener('click', e => { if(e.target.id === 'postsOverlay') closeManagePosts(); });
