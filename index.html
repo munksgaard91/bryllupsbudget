@@ -458,16 +458,28 @@
   /* ---------- Afventer tilbud ---------- */
   .pending-wrap{margin-top:18px;}
   .pending-hint{margin:-6px 0 12px;font-size:.82rem;color:var(--muted);}
-  .chip.pending{border-style:dashed;background:transparent;flex-wrap:wrap;border-radius:16px;}
-  .chip .chip-date{color:var(--muted);font-size:.78rem;white-space:nowrap;}
-  .chip .chip-note{color:var(--muted);font-size:.78rem;font-style:italic;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .chip .chip-convert{
+  .pending-list{display:flex;flex-direction:column;gap:8px;}
+  .pending-row{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--white);
+    border:1px dashed var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:var(--shadow);
+    font-size:.85rem;
+  }
+  .pending-row.editing{border-style:solid;border-color:var(--sage-700);}
+  .pending-row .p-name{font-weight:600;color:var(--sage-900);}
+  .pending-row .p-date{color:var(--muted);font-size:.78rem;white-space:nowrap;}
+  .pending-row .p-note{color:var(--muted);font-size:.78rem;font-style:italic;flex:1 1 160px;min-width:0;}
+  .pending-row .p-actions{margin-left:auto;display:flex;align-items:center;gap:2px;white-space:nowrap;}
+  .chip-convert{
     background:none;border:none;cursor:pointer;padding:2px 6px;margin:0;
     font-size:.76rem;color:var(--sage-700);text-decoration:underline;
     white-space:nowrap;
   }
-  .chip .chip-convert:hover{color:var(--sage-900);background:none;transform:none;}
-  .chip .chip-convert:active{transform:none;}
+  .chip-convert:hover{color:var(--sage-900);background:none;transform:none;}
+  .chip-convert:active{transform:none;}
   .pending-add{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
   .pending-add input{
     border:1px solid var(--line);border-radius:10px;
@@ -479,6 +491,7 @@
   .pending-add #pendingNote{flex:1 1 180px;}
   @media (max-width:640px){
     .pending-add input{flex:1 1 100%;}
+    .pending-row .p-actions{margin-left:0;width:100%;justify-content:flex-end;}
   }
 
   /* ---------- Modal ---------- */
@@ -883,12 +896,13 @@
 <div class="all-offers pending-wrap" id="pendingWrap">
   <h3>Afventer tilbud</h3>
   <p class="pending-hint">Steder/leverandører I har skrevet til, men endnu ikke har fået tilbud fra.</p>
-  <div class="chips" id="pendingChips"></div>
+  <div class="pending-list" id="pendingList"></div>
   <div class="pending-add">
     <input type="text" id="pendingName" placeholder="Navn (fx Holckenhavn Slot)">
     <input type="text" id="pendingDate" placeholder="Kontaktet (fx 12/7)">
     <input type="text" id="pendingNote" placeholder="Note (valgfri)">
     <button class="ghost" id="btnAddPending">+ Tilføj</button>
+    <button class="ghost" id="btnCancelPending" style="display:none;">Annullér</button>
   </div>
 </div>
 
@@ -1640,38 +1654,77 @@ function renderChips(){
 }
 
 /* ===================== Afventer tilbud ===================== */
-/* Overbliksliste over kontaktede steder/leverandører uden svar endnu.
-   "Opret tilbud" åbner tilbuds-modalen med navn/note udfyldt, og fjerner
-   posten fra ventelisten når tilbuddet gemmes. */
+/* Overbliksliste over kontaktede steder/leverandører uden svar endnu —
+   én række pr. sted. ✎ loader rækken ind i formularen nedenunder
+   (knappen skifter til "Gem ændringer"), "Opret tilbud" åbner tilbuds-
+   modalen med navn/note udfyldt og fjerner posten når tilbuddet gemmes. */
 let pendingConvertId = null;
+let editingPendingId = null;
 
 function renderPending(){
-  const wrap = document.getElementById('pendingChips');
+  const wrap = document.getElementById('pendingList');
   wrap.innerHTML = '';
   state.pending.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'chip pending';
-    let inner = `<span>${escapeHtml(p.name)}</span>`;
-    if(p.date) inner += `<span class="chip-date">skrevet ${escapeHtml(p.date)}</span>`;
-    if(p.note) inner += `<span class="chip-note" title="${escapeHtml(p.note)}">${escapeHtml(p.note)}</span>`;
-    div.innerHTML = inner;
+    const row = document.createElement('div');
+    row.className = 'pending-row' + (p.id === editingPendingId ? ' editing' : '');
+    let inner = `<span class="p-name">${escapeHtml(p.name)}</span>`;
+    if(p.date) inner += `<span class="p-date">skrevet ${escapeHtml(p.date)}</span>`;
+    if(p.note) inner += `<span class="p-note">${escapeHtml(p.note)}</span>`;
+    row.innerHTML = inner;
+
+    const actions = document.createElement('span');
+    actions.className = 'p-actions';
 
     const convertBtn = document.createElement('button');
     convertBtn.className = 'chip-convert';
     convertBtn.textContent = 'Opret tilbud';
     convertBtn.title = 'Vi har fået tilbuddet — indtast det';
     convertBtn.onclick = () => convertPending(p.id);
-    div.appendChild(convertBtn);
+    actions.appendChild(convertBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'pencil-btn';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Redigér';
+    editBtn.onclick = () => startEditPending(p.id);
+    actions.appendChild(editBtn);
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'pencil-btn';
     removeBtn.textContent = '✕';
     removeBtn.title = 'Fjern fra listen';
     removeBtn.onclick = () => removePending(p.id);
-    div.appendChild(removeBtn);
+    actions.appendChild(removeBtn);
 
-    wrap.appendChild(div);
+    row.appendChild(actions);
+    wrap.appendChild(row);
   });
+}
+
+function setPendingFormMode(editing){
+  document.getElementById('btnAddPending').textContent = editing ? 'Gem ændringer' : '+ Tilføj';
+  document.getElementById('btnCancelPending').style.display = editing ? 'inline-block' : 'none';
+}
+
+function startEditPending(id){
+  const p = state.pending.find(x => x.id === id);
+  if(!p) return;
+  editingPendingId = id;
+  document.getElementById('pendingName').value = p.name;
+  document.getElementById('pendingDate').value = p.date || '';
+  document.getElementById('pendingNote').value = p.note || '';
+  setPendingFormMode(true);
+  renderPending();
+  document.getElementById('pendingName').focus();
+}
+
+function cancelEditPending(){
+  editingPendingId = null;
+  document.getElementById('pendingName').value = '';
+  document.getElementById('pendingDate').value = '';
+  document.getElementById('pendingNote').value = '';
+  setPendingFormMode(false);
+  renderPending();
 }
 
 function addPending(){
@@ -1680,7 +1733,15 @@ function addPending(){
   const noteEl = document.getElementById('pendingNote');
   const name = nameEl.value.trim();
   if(!name){ alert('Skriv et navn på stedet/leverandøren.'); nameEl.focus(); return; }
-  state.pending.push({ id: uid(), name, date: dateEl.value.trim(), note: noteEl.value.trim() });
+
+  if(editingPendingId){
+    const p = state.pending.find(x => x.id === editingPendingId);
+    if(p){ p.name = name; p.date = dateEl.value.trim(); p.note = noteEl.value.trim(); }
+    editingPendingId = null;
+    setPendingFormMode(false);
+  } else {
+    state.pending.push({ id: uid(), name, date: dateEl.value.trim(), note: noteEl.value.trim() });
+  }
   nameEl.value = ''; dateEl.value = ''; noteEl.value = '';
   nameEl.focus();
   persist();
@@ -1692,6 +1753,7 @@ function removePending(id){
   if(!p) return;
   if(!confirm(`Fjern "${p.name}" fra Afventer tilbud?`)) return;
   state.pending = state.pending.filter(x => x.id !== id);
+  if(editingPendingId === id) cancelEditPending();
   persist();
   renderPending();
 }
@@ -1699,6 +1761,7 @@ function removePending(id){
 function convertPending(id){
   const p = state.pending.find(x => x.id === id);
   if(!p) return;
+  if(editingPendingId === id) cancelEditPending();
   pendingConvertId = id;
   openAddOffer();
   document.getElementById('fName').value = p.name;
@@ -2192,8 +2255,12 @@ document.getElementById('overlay').addEventListener('click', e => { if(e.target.
 document.getElementById('btnManagePosts').onclick = openManagePosts;
 document.getElementById('btnExportCsv').onclick = exportCsv;
 document.getElementById('btnAddPending').onclick = addPending;
+document.getElementById('btnCancelPending').onclick = cancelEditPending;
 ['pendingName','pendingDate','pendingNote'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => { if(e.key === 'Enter') addPending(); });
+  document.getElementById(id).addEventListener('keydown', e => {
+    if(e.key === 'Enter') addPending();
+    if(e.key === 'Escape' && editingPendingId) cancelEditPending();
+  });
 });
 document.getElementById('btnClosePosts').onclick = closeManagePosts;
 document.getElementById('btnAddCategory').onclick = addCategory;
