@@ -39,11 +39,8 @@
     font-family:'Jost', sans-serif;
     font-weight:400;
     line-height:1.5;
-    /* Plads i bunden så den faste totalbar aldrig dækker indhold */
     padding-bottom:140px;
   }
-  /* Delt bredde/margin-regel, så header, værktøjslinje, sammenlign-boks og
-     tabellen altid har præcis samme venstre/højre kant. */
   .wrap, .toolbar, .compare-controls, .table-wrap, .empty-state, .all-offers{
     max-width:1180px;
     margin-left:auto;
@@ -144,7 +141,7 @@
   }
   .money-input:focus{outline:none;border-color:var(--sage-500);}
 
-  /* ---------- Sync status (lille info-linje under eyebrow) ---------- */
+  /* ---------- Sync status ---------- */
   .sync-status{
     display:inline-flex;
     align-items:center;
@@ -197,7 +194,6 @@
   button.danger:hover{background:var(--terracotta-bg);}
   button.small{padding:6px 12px;font-size:.78rem;}
 
-  /* Small inline pencil icon-button (headers, own-budget cells, chips) */
   .pencil-btn{
     background:none;
     border:none;
@@ -286,7 +282,6 @@
     vertical-align:top;
   }
   table.compare thead th.col-item{width:26%;}
-  /* Subtil skillelinje mellem "Vores budget" (originalen) og tilbudene */
   table.compare thead th:nth-child(2){border-right:1px solid rgba(255,255,255,.18);}
   table.compare tbody td:nth-child(2), table.compare tfoot td:nth-child(2){border-right:1px solid var(--sage-200);}
   table.compare thead th .colhead{
@@ -297,11 +292,17 @@
   }
   table.compare thead th .colname{
     font-family:'Jost',sans-serif;
-    font-size:1.15rem;
+    font-size:.95rem;
     font-weight:600;
     display:flex;
     align-items:center;
     gap:6px;
+  }
+  table.compare thead th .coltotal{
+    font-size:.78rem;
+    font-weight:400;
+    color:rgba(255,255,255,.55);
+    font-variant-numeric:tabular-nums;
   }
   table.compare thead th .pencil-btn{color:#fff;opacity:.7;}
   table.compare thead th .pencil-btn:hover{opacity:1;}
@@ -325,7 +326,9 @@
   tr.cat-row td.cat-subtotal{
     text-transform:none;
     letter-spacing:normal;
-    font-size:.82rem;
+    font-size:.92rem;
+    font-weight:500;
+    color:var(--sage-400);
     white-space:nowrap;
   }
   tbody tr.item-row{height:60px;}
@@ -338,9 +341,6 @@
   }
   tbody tr.item-row:hover td{background:var(--sage-50);}
   td.item-label{color:var(--text);}
-  /* Native vertical-align:middle på td'en (ovenfor) klarer nu den lodrette
-     centrering i stedet for absolut positionering. .cell-vcenter er bevidst
-     tom/uden effekt her — klassen står stadig i markup'et, men gør intet. */
   .item-label-inner{
     display:flex;
     flex-direction:column;
@@ -366,7 +366,6 @@
   .cell-value-wrap{display:flex;flex-direction:column;}
   .cell-value{font-weight:500;}
   .cell-value.inherited{color:var(--muted);font-style:italic;font-weight:400;}
-  /* Kuvertpris: lille undertekst med pris pr. gæst, vist under totalen */
   .unit-price{
     display:block;
     font-size:.72rem;
@@ -494,6 +493,43 @@
     .pending-row .p-actions{margin-left:0;width:100%;justify-content:flex-end;}
   }
 
+  /* ---------- Afvist ---------- */
+  .rejected-wrap{
+    background:var(--terracotta-bg);
+    border-color:rgba(192,123,95,.3);
+  }
+  .rejected-wrap h3{color:var(--terracotta);}
+  .rejected-list{display:flex;flex-direction:column;gap:8px;}
+  .rejected-row{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--white);
+    border:1px solid rgba(192,123,95,.25);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:var(--shadow);
+    font-size:.85rem;
+    opacity:.7;
+  }
+  .rejected-row .r-name{font-weight:600;color:var(--terracotta);text-decoration:line-through;}
+  .rejected-row .r-reason{color:var(--muted);font-size:.78rem;font-style:italic;flex:1 1 160px;min-width:0;}
+  .rejected-row .r-type{
+    font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);background:var(--sage-50);
+    padding:2px 8px;border-radius:999px;white-space:nowrap;
+  }
+  .rejected-row .r-total{color:var(--muted);font-size:.82rem;white-space:nowrap;}
+  .rejected-row .r-actions{margin-left:auto;display:flex;align-items:center;gap:2px;white-space:nowrap;}
+  .chip-undo{
+    background:none;border:none;cursor:pointer;padding:2px 6px;margin:0;
+    font-size:.76rem;color:var(--sage-700);text-decoration:underline;
+    white-space:nowrap;
+  }
+  .chip-undo:hover{color:var(--sage-900);background:none;transform:none;}
+  .chip-undo:active{transform:none;}
+  @media (max-width:640px){
+    .rejected-row .r-actions{margin-left:0;width:100%;justify-content:flex-end;}
+  }
+
   /* ---------- Modal ---------- */
   .overlay{
     position:fixed;inset:0;
@@ -536,7 +572,6 @@
     background:#fff;
   }
   .field textarea{min-height:64px;resize:vertical;}
-  /* Kompakt, men rummelig nok til en liste på 2-20 datoer (én pr. linje) */
   .field textarea.dates-input{
     min-height:96px;
     font-size:.85rem;
@@ -683,7 +718,7 @@
     background:#fff;
   }
 
-  /* ---------- Mobil kort-visning (erstatter tabellen på smalle skærme) ---------- */
+  /* ---------- Mobil kort-visning ---------- */
   #mobileCardsWrap{display:none;}
   .mobile-cat-card{
     background:var(--white);
@@ -742,7 +777,6 @@
   .mobile-offer-dates{font-size:.72rem;color:var(--muted);margin-top:-4px;margin-bottom:8px;}
   .mobile-frame-diff{font-size:.8rem;color:var(--muted);margin-top:6px;}
 
-  /* Noter i kolonneheader (ⓘ-toggle) og mobil-totalkort */
   .note-btn{
     background:none;border:none;cursor:pointer;padding:0 2px;margin:0;
     font-size:.85rem;line-height:1;opacity:.7;color:inherit;
@@ -767,24 +801,31 @@
     box-shadow:0 -4px 14px rgba(60,70,50,.08);
   }
   .sticky-totals-inner{
-    max-width:1180px;margin:0 auto;padding:10px 24px;
-    display:flex;gap:26px;align-items:center;
+    max-width:1180px;margin:0 auto;padding:8px 24px;
+    display:flex;gap:14px;align-items:center;
     overflow-x:auto;-webkit-overflow-scrolling:touch;
   }
-  .st-entry{flex:none;display:flex;flex-direction:column;gap:1px;}
+  .st-entry{flex:none;display:flex;flex-direction:column;gap:0px;}
+  .st-entry.st-own{
+    border-right:2px solid var(--sage-400);
+    padding-right:14px;
+    margin-right:2px;
+  }
   .st-name{
-    font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;
+    font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;
     color:var(--muted);font-weight:500;white-space:nowrap;
   }
-  .st-name.own{color:var(--sage-700);}
+  .st-name.own{color:var(--sage-700);font-weight:600;}
   .st-value{
-    font-weight:600;font-size:1.02rem;color:var(--sage-900);
+    font-weight:600;font-size:.88rem;color:var(--sage-900);
     font-variant-numeric:tabular-nums;white-space:nowrap;
   }
-  .st-diff{font-size:.7rem;white-space:nowrap;}
+  .st-entry.st-own .st-value{font-size:.95rem;}
+  .st-diff{font-size:.62rem;white-space:nowrap;}
   @media (max-width:480px){
-    .sticky-totals-inner{padding:8px 16px;gap:18px;}
-    .st-value{font-size:.95rem;}
+    .sticky-totals-inner{padding:6px 12px;gap:10px;}
+    .st-value{font-size:.8rem;}
+    .st-entry.st-own .st-value{font-size:.88rem;}
   }
 
   @media (max-width:780px){
@@ -802,7 +843,6 @@
     .overlay{padding:24px 12px;}
   }
 
-  /* ---------- Responsivt: meget smal skærm (iPhone) ---------- */
   @media (max-width:480px){
     .wrap, .toolbar, .compare-controls, .table-wrap, .empty-state, .all-offers{
       padding-left:16px;
@@ -813,15 +853,11 @@
     .frame-card .money-input{width:120px;}
   }
 
-  /* iOS zoomer siden ind når man fokuserer et felt med font-size < 16px —
-     tving derfor alle inputs/selects op på mindst 16px på smalle skærme. */
   @media (max-width:780px){
     input, select, textarea{font-size:16px;}
     .modal-item-row .money-input{width:110px;}
   }
 
-  /* Større tap-mål og synlighed for ikon-knapper på touch-skærme (der har
-     ingen :hover-tilstand, så den lave standard-opacity skal skrues op). */
   @media (max-width:780px){
     .pencil-btn{padding:8px;opacity:.75;}
     .drag-handle{padding:8px;font-size:1.15rem;}
@@ -906,6 +942,11 @@
   </div>
 </div>
 
+<div class="all-offers rejected-wrap" id="rejectedWrap" style="display:none;">
+  <h3>Afvist</h3>
+  <div class="rejected-list" id="rejectedList"></div>
+</div>
+
 <div class="sticky-totals" id="stickyTotals" style="display:none;">
   <div class="sticky-totals-inner" id="stickyTotalsInner"></div>
 </div>
@@ -966,24 +1007,6 @@
 </div>
 
 <script>
-/* =====================================================================
-   SKY-SYNC OPSÆTNING (valgfrit, men anbefalet)
-   ---------------------------------------------------------------------
-   For at Rasmus og Camilla altid ser samme data uden at skulle
-   eksportere/importere filer manuelt, bruger siden en gratis JSON-bin
-   hos jsonbin.io som "database".
-
-   Sådan sætter du det op (ca. 5 minutter, kun én gang):
-   1. Gå til https://jsonbin.io og opret en gratis konto.
-   2. Klik "Create Bin", indsæt {} som indhold, og gem.
-   3. Kopiér Bin-ID'et (vises i URL'en / dashboardet).
-   4. Gå til "API Keys" i din konto og kopiér din "X-Master-Key".
-   5. Indsæt begge dele herunder mellem citationstegnene.
-   6. Commit og push filen til jeres GitHub-repo.
-
-   Indtil dette er udfyldt, gemmes data kun lokalt i browseren
-   (localStorage) — siden virker stadig fint til at teste med.
-===================================================================== */
 const SYNC = {
   enabled: true,
   binId:  "6a4fe786da38895dfe475ae5",
@@ -991,10 +1014,6 @@ const SYNC = {
   baseUrl: "https://api.jsonbin.io/v3/b"
 };
 
-/* ===================== Kategorier & poster ===================== */
-/* Bemærk: kategorier/poster gemmes i state.categories, så de kan
-   redigeres i browseren (se "Tilpas poster") og synkroniseres til skyen.
-   defaultCategories() bruges kun til at bygge start-/eksempeldata. */
 function defaultCategories(){
   return [
     { key:'venue', name:'Sted & fest', items:[
@@ -1046,9 +1065,6 @@ function emptyOfferItems(categories){
 function catKeyUid(){ return 'c' + Math.random().toString(36).slice(2,8); }
 function itemIdUid(catKey){ return catKey + '_' + Math.random().toString(36).slice(2,8); }
 
-/* Sikrer at ældre/manglende felter i indlæst state udfyldes, så nye
-   kategorier/poster altid findes for både eget budget og alle tilbud,
-   og at slettede poster/kategorier ikke ligger tilbage som støv. */
 function normalizeState(s){
   if(!s) return s;
   if(!s.categories || !Array.isArray(s.categories) || s.categories.length===0){
@@ -1061,8 +1077,6 @@ function normalizeState(s){
   items.forEach(i => { if(s.ownBudget[i.id] === undefined) s.ownBudget[i.id] = i.def; });
   Object.keys(s.ownBudget).forEach(k => { if(!validIds.has(k)) delete s.ownBudget[k]; });
 
-  // Robusthed: sikr at kernefelter altid findes som de rigtige typer, uanset
-  // hvor state kommer fra (frisk seed, gammel sky-data, delvist korrupt data).
   if(!Array.isArray(s.offers)) s.offers = [];
   s.offers.forEach(o => {
     o.items = o.items || {};
@@ -1074,10 +1088,10 @@ function normalizeState(s){
     s.compare = {};
   }
 
-  // "Afventer tilbud": steder/leverandører vi har skrevet til, men som
-  // endnu ikke har svaret med et tilbud. Rent overbliks-data.
   if(!Array.isArray(s.pending)) s.pending = [];
   s.pending = s.pending.filter(p => p && typeof p === 'object' && typeof p.name === 'string' && p.name.trim());
+  if(!Array.isArray(s.rejected)) s.rejected = [];
+  s.rejected = s.rejected.filter(r => r && typeof r === 'object' && typeof r.name === 'string' && r.name.trim());
   if(!s.meta || typeof s.meta !== 'object'){
     s.meta = { updatedAt: new Date().toISOString() };
   }
@@ -1085,7 +1099,6 @@ function normalizeState(s){
   if(!s.frame || typeof s.frame !== 'object'){
     s.frame = { target: 190000 };
   } else if(s.frame.target === undefined || s.frame.target === null){
-    // Migrering fra tidligere min/maks-ramme til ét ønsket budget-tal
     s.frame.target = s.frame.max !== undefined ? s.frame.max : (s.frame.min !== undefined ? s.frame.min : 190000);
   }
 
@@ -1096,7 +1109,6 @@ function normalizeState(s){
   return s;
 }
 
-/* ===================== Eksempeldata ===================== */
 function buildDefaultState(){
   const categories = defaultCategories();
   return {
@@ -1150,7 +1162,6 @@ function buildDefaultState(){
   };
 }
 
-/* ===================== State ===================== */
 let state = null;
 const LS_KEY = 'bryllupsbudget_v1';
 
@@ -1203,7 +1214,6 @@ async function loadState(){
       const data = await res.json();
       let cloud = data.record;
       if(!cloud || !cloud.meta){
-        // Tom / ny bin -> seed med eksempeldata
         cloud = normalizeState(buildDefaultState());
         await pushCloud(cloud);
       }
@@ -1214,8 +1224,6 @@ async function loadState(){
         render();
         setSyncStatus('ok');
       } else {
-        // Lokal state er nyere end skyen (fx redigeringer lavet offline).
-        // Uden dette push ville de først nå skyen ved næste manuelle ændring.
         await pushCloud(state);
       }
     } else {
@@ -1227,20 +1235,13 @@ async function loadState(){
     setSyncStatus('offline');
   }
 
-  // Poll periodisk for opdateringer fra den anden part
   setInterval(pollCloud, 25000);
 }
 
 async function pollCloud(){
   if(!isSyncConfigured()) return;
-  // Undgå at forstyrre brugeren midt i en aktiv redigering: spring denne
-  // poll over hvis der redigeres et beløb inline, eller en af modalerne er åben.
-  // Ellers ville et indkommende cloud-render kunne nulstille ugemte indtastninger.
   const overlayOpen = document.getElementById('overlay').classList.contains('open');
   const postsOverlayOpen = document.getElementById('postsOverlay').classList.contains('open');
-  // pendingSave: en lokal ændring venter på (eller er midt i) at blive
-  // skubbet til skyen. Henter poll'en cloud-state ind nu, ville den lokale
-  // ændring blive overskrevet og den gamle cloud-state pushet i stedet.
   if(editingOwnItem || overlayOpen || postsOverlayOpen || pendingSave) return;
   try{
     const res = await fetch(`${SYNC.baseUrl}/${SYNC.binId}/latest`, { headers:{ 'X-Master-Key': SYNC.apiKey }});
@@ -1253,11 +1254,11 @@ async function pollCloud(){
       render();
       setSyncStatus('ok');
     }
-  }catch(e){ /* stille fejl ved polling */ }
+  }catch(e){}
 }
 
 let saveTimer = null;
-let pendingSave = false; // true fra en ændring laves, til den er skubbet til skyen
+let pendingSave = false;
 function persist(){
   state.meta.updatedAt = new Date().toISOString();
   saveLocal(state);
@@ -1281,7 +1282,6 @@ async function pushCloud(s){
   finally{ pendingSave = false; }
 }
 
-/* ===================== Tal-helpers ===================== */
 function kr(n){
   n = Math.round(n || 0);
   return n.toLocaleString('da-DK') + ' kr.';
@@ -1291,9 +1291,6 @@ function fmtInt(n){
   return n.toLocaleString('da-DK');
 }
 function parseMoneyInput(str){
-  // Budgettet regner i hele kroner. Et indsat beløb som "1.500,50" må dog
-  // ikke blive til 150050 — komma efterfulgt af 1-2 cifre (evt. "kr.")
-  // tolkes derfor som decimaler og afrundes til nærmeste hele krone.
   let s = String(str || '').trim();
   let dec = 0;
   const m = s.match(/^(.*?),(\d{1,2})\s*(kr\.?)?\s*$/i);
@@ -1315,9 +1312,6 @@ function bindMoneyInput(el){
 function itemById(itemId){
   return allItems(state).find(i => i.id === itemId);
 }
-// Kuvertpris-poster gemmes som en pris PR. GÆST (både i eget budget og i
-// tilbud); guestMultiplier() ganger den rå pris op til det faktiske,
-// budgetterede beløb, som bruges alle steder hvor der regnes/vises totaler.
 function guestMultiplier(item){
   return (item && item.perGuest) ? Math.max(0, Number(state.guestCount) || 0) : 1;
 }
@@ -1356,7 +1350,6 @@ function categoryOfferSubtotal(cat, offer){
 function getOffer(id){ return state.offers.find(o => o.id === id); }
 function uid(){ return 'o' + Math.random().toString(36).slice(2,9); }
 
-/* ===================== Render ===================== */
 function render(){
   if(!state) return;
 
@@ -1367,6 +1360,7 @@ function render(){
   renderTable();
   renderChips();
   renderPending();
+  renderRejected();
   renderStickyTotals();
 
   document.getElementById('emptyState').style.display = state.offers.length === 0 ? 'block' : 'none';
@@ -1375,8 +1369,6 @@ function render(){
 }
 
 function currentColumns(){
-  // Returnerer array af offer-objekter der skal vises som kolonner (maks 2).
-  // state.compare.b === '' betyder at brugeren bevidst har valgt kun ét tilbud.
   if(state.offers.length <= 1) return state.offers.slice();
   const a = getOffer(state.compare.a) || state.offers[0];
   if(state.compare.b === '') return [a];
@@ -1421,7 +1413,6 @@ function renderCompareControls(){
 }
 
 let editingOwnItem = null;
-// Hvilke tilbuds noter er foldet ud (kun UI-tilstand, gemmes ikke)
 const openNotes = new Set();
 function toggleNote(offerId){
   if(openNotes.has(offerId)) openNotes.delete(offerId);
@@ -1457,7 +1448,7 @@ function renderTable(){
 
   let html = '<table class="compare"><thead><tr>';
   html += '<th class="col-item"></th>';
-  html += '<th><div class="colhead"><span class="colname">Vores budget</span></div></th>';
+  html += `<th><div class="colhead"><span class="colname">Vores budget</span><span class="coltotal">${kr(ownTotal())}</span></div></th>`;
   cols.forEach(o => {
     const datesLine = o.dates ? o.dates.split(/\r?\n/).map(s => s.trim()).filter(Boolean).join(', ') : '';
     const hasNote = !!(o.notes && o.notes.trim());
@@ -1467,6 +1458,7 @@ function renderTable(){
         <button class="pencil-btn" onclick="openEditOffer('${o.id}')" title="Redigér">✎</button>
         ${hasNote ? `<button class="note-btn" onclick="toggleNote('${o.id}')" title="${noteOpen ? 'Skjul noter' : 'Vis noter'}">ⓘ</button>` : ''}
       </span>
+      <span class="coltotal">${kr(offerTotal(o))}</span>
       ${datesLine ? `<span class="coldates">${escapeHtml(datesLine)}</span>` : ''}
       ${noteOpen ? `<span class="colnote">${escapeHtml(o.notes).replace(/\r?\n/g,'<br>')}</span>` : ''}
     </div></th>`;
@@ -1531,9 +1523,6 @@ function renderTable(){
   wireOwnEditInputs();
 }
 
-/* Kort-baseret visning til smalle skærme (erstatter tabellen via CSS-media-query,
-   så man slipper for sidescroll på mobil). Bruger samme data/regnestykker som
-   skrivebords-tabellen. */
 function renderMobileCards(cols){
   const wrap = document.getElementById('mobileCardsWrap');
   let html = '';
@@ -1589,8 +1578,6 @@ function renderMobileCards(cols){
   wrap.innerHTML = html;
 }
 
-/* Fælles opsætning af det (evt.) synlige inline-redigeringsfelt for eget budget,
-   uanset om det er skrivebords-tabellen eller mobil-kortene der er aktive. */
 function wireOwnEditInputs(){
   if(!editingOwnItem) return;
   document.querySelectorAll('.own-edit-input').forEach(inp => {
@@ -1601,7 +1588,6 @@ function wireOwnEditInputs(){
       if(e.key === 'Escape'){ editingOwnItem = null; renderTable(); }
     });
   });
-  // Fokusér kun det felt der reelt er synligt (skjulte felter kan ikke få fokus).
   const visible = [...document.querySelectorAll('.own-edit-input')].find(el => el.offsetParent !== null);
   if(visible){ visible.focus(); visible.select(); }
 }
@@ -1612,7 +1598,6 @@ function frameDiffText(total){
   if(d > 0) return `<span class="diff-tag bad">+ ${kr(d)} over ønsket budget</span>`;
   return `<span class="diff-tag good">− ${kr(Math.abs(d))} under ønsket budget</span>`;
 }
-/* Kort variant til den faste totalbar, hvor pladsen er trang */
 function frameDiffShort(total){
   const d = total - state.frame.target;
   if(Math.abs(d) <= 500) return `<span class="diff-tag neutral">≈ ønsket</span>`;
@@ -1620,16 +1605,15 @@ function frameDiffShort(total){
   return `<span class="diff-tag good">−${kr(Math.abs(d))}</span>`;
 }
 
-/* Fast bar i bunden: eget budget + de aktive sammenlignings-kolonner,
-   så totalen og afvigelsen fra ønsket budget altid er synlig uden scroll. */
+/* Fast bar i bunden: eget budget + ALLE tilbud */
 function renderStickyTotals(){
   const bar = document.getElementById('stickyTotals');
   const inner = document.getElementById('stickyTotalsInner');
   if(!state){ bar.style.display = 'none'; return; }
   bar.style.display = 'block';
   const ot = ownTotal();
-  let html = `<div class="st-entry"><span class="st-name own">Vores budget</span><span class="st-value">${kr(ot)}</span><span class="st-diff">${frameDiffShort(ot)}</span></div>`;
-  currentColumns().forEach(o => {
+  let html = `<div class="st-entry st-own"><span class="st-name own">Vores budget</span><span class="st-value">${kr(ot)}</span><span class="st-diff">${frameDiffShort(ot)}</span></div>`;
+  state.offers.forEach(o => {
     const t = offerTotal(o);
     html += `<div class="st-entry"><span class="st-name">${escapeHtml(o.name)}</span><span class="st-value">${kr(t)}</span><span class="st-diff">${frameDiffShort(t)}</span></div>`;
   });
@@ -1649,15 +1633,18 @@ function renderChips(){
     editBtn.title = 'Redigér';
     editBtn.onclick = () => openEditOffer(o.id);
     div.appendChild(editBtn);
+    const rejectBtn = document.createElement('button');
+    rejectBtn.className = 'pencil-btn';
+    rejectBtn.textContent = '✕';
+    rejectBtn.title = 'Afvis tilbud';
+    rejectBtn.style.color = 'var(--terracotta)';
+    rejectBtn.onclick = () => rejectOffer(o.id);
+    div.appendChild(rejectBtn);
     wrap.appendChild(div);
   });
 }
 
 /* ===================== Afventer tilbud ===================== */
-/* Overbliksliste over kontaktede steder/leverandører uden svar endnu —
-   én række pr. sted. ✎ loader rækken ind i formularen nedenunder
-   (knappen skifter til "Gem ændringer"), "Opret tilbud" åbner tilbuds-
-   modalen med navn/note udfyldt og fjerner posten når tilbuddet gemmes. */
 let pendingConvertId = null;
 let editingPendingId = null;
 
@@ -1688,6 +1675,14 @@ function renderPending(){
     editBtn.title = 'Redigér';
     editBtn.onclick = () => startEditPending(p.id);
     actions.appendChild(editBtn);
+
+    const rejectBtn = document.createElement('button');
+    rejectBtn.className = 'chip-convert';
+    rejectBtn.textContent = 'Afvis';
+    rejectBtn.style.color = 'var(--terracotta)';
+    rejectBtn.title = 'Afvis — flyt til Afvist';
+    rejectBtn.onclick = () => rejectPending(p.id);
+    actions.appendChild(rejectBtn);
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'pencil-btn';
@@ -1766,6 +1761,103 @@ function convertPending(id){
   openAddOffer();
   document.getElementById('fName').value = p.name;
   if(p.note) document.getElementById('fNotes').value = p.note;
+}
+
+/* ===================== Afvist ===================== */
+function rejectOffer(id){
+  const o = getOffer(id);
+  if(!o) return;
+  const reason = prompt(`Hvorfor afvises "${o.name}"?`);
+  if(reason === null) return; // annulleret
+  state.rejected.push({
+    id: uid(),
+    name: o.name,
+    reason: reason.trim(),
+    type: 'offer',
+    total: offerTotal(o),
+    data: JSON.parse(JSON.stringify(o))
+  });
+  state.offers = state.offers.filter(x => x.id !== id);
+  if(state.compare.a === id) state.compare.a = state.offers[0]?.id || null;
+  if(state.compare.b === id) state.compare.b = state.offers.find(x=>x.id!==state.compare.a)?.id || null;
+  persist();
+  render();
+}
+
+function rejectPending(id){
+  const p = state.pending.find(x => x.id === id);
+  if(!p) return;
+  const reason = prompt(`Hvorfor afvises "${p.name}"?`);
+  if(reason === null) return;
+  if(editingPendingId === id) cancelEditPending();
+  state.rejected.push({
+    id: uid(),
+    name: p.name,
+    reason: reason.trim(),
+    type: 'pending',
+    data: JSON.parse(JSON.stringify(p))
+  });
+  state.pending = state.pending.filter(x => x.id !== id);
+  persist();
+  render();
+}
+
+function undoReject(rejId){
+  const r = state.rejected.find(x => x.id === rejId);
+  if(!r) return;
+  if(r.type === 'offer' && r.data){
+    state.offers.push(r.data);
+    if(state.offers.length === 1) state.compare.a = r.data.id;
+    else if(state.offers.length === 2 && !state.compare.b) state.compare.b = r.data.id;
+  } else if(r.type === 'pending' && r.data){
+    state.pending.push(r.data);
+  }
+  state.rejected = state.rejected.filter(x => x.id !== rejId);
+  persist();
+  render();
+}
+
+function removeRejected(rejId){
+  state.rejected = state.rejected.filter(x => x.id !== rejId);
+  persist();
+  renderRejected();
+}
+
+function renderRejected(){
+  const wrap = document.getElementById('rejectedWrap');
+  const list = document.getElementById('rejectedList');
+  if(!state.rejected.length){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = '';
+  state.rejected.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'rejected-row';
+    let inner = `<span class="r-name">${escapeHtml(r.name)}</span>`;
+    inner += `<span class="r-type">${r.type === 'offer' ? 'Tilbud' : 'Afventede'}</span>`;
+    if(r.total) inner += `<span class="r-total">${kr(r.total)}</span>`;
+    if(r.reason) inner += `<span class="r-reason">${escapeHtml(r.reason)}</span>`;
+    row.innerHTML = inner;
+
+    const actions = document.createElement('span');
+    actions.className = 'r-actions';
+
+    const undoBtn = document.createElement('button');
+    undoBtn.className = 'chip-undo';
+    undoBtn.textContent = 'Fortryd';
+    undoBtn.title = 'Gendan dette tilbud/sted';
+    undoBtn.onclick = () => undoReject(r.id);
+    actions.appendChild(undoBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'pencil-btn';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Fjern permanent';
+    delBtn.onclick = () => removeRejected(r.id);
+    actions.appendChild(delBtn);
+
+    row.appendChild(actions);
+    list.appendChild(row);
+  });
 }
 
 /* ===================== Modal: tilføj/redigér tilbud ===================== */
@@ -1848,7 +1940,6 @@ function saveOfferFromModal(){
     state.offers.push(newOffer);
     if(state.offers.length === 1) state.compare.a = newOffer.id;
     else if(state.offers.length === 2) state.compare.b = newOffer.id;
-    // Kom tilbuddet fra ventelisten, fjernes posten dér nu
     if(pendingConvertId){
       state.pending = state.pending.filter(x => x.id !== pendingConvertId);
       pendingConvertId = null;
@@ -1871,10 +1962,6 @@ function deleteOffer(){
 }
 
 /* ===================== Modal: tilpas poster ===================== */
-/* Slår kuvertpris til/fra på en post. Uden hjælp ville et eksisterende
-   totalbeløb pludselig blive tolket som pris pr. gæst (og ganget op med
-   gæsteantallet) — derfor tilbydes en omregning, der bevarer totalen.
-   Gælder både eget budget og alle indtastede tilbudsværdier for posten. */
 function togglePerGuest(item, checked){
   const guests = Math.max(0, Number(state.guestCount) || 0);
   const ownVal = Number(state.ownBudget[item.id]) || 0;
@@ -1916,7 +2003,7 @@ function removeItemFromState(itemId){
 }
 
 let dragCatKey = null;
-let dragItem = null; // { catKey, itemId }
+let dragItem = null;
 
 function reorderCategory(draggedKey, targetKey){
   if(draggedKey === targetKey) return;
@@ -1950,10 +2037,6 @@ function renderManagePosts(){
   state.categories.forEach(cat => {
     const catDiv = document.createElement('div');
     catDiv.className = 'manage-cat';
-    // draggable sættes kun midlertidigt via mousedown på drag-handlen (se
-    // nedenfor). Var hele rækken permanent draggable, ville mus-drag i
-    // tekstfelterne starte en flytning i stedet for tekstmarkering
-    // (bekræftet i både Chromium og Firefox).
     catDiv.draggable = false;
     catDiv.dataset.catKey = cat.key;
     catDiv.addEventListener('dragstart', e => {
@@ -1964,9 +2047,6 @@ function renderManagePosts(){
     });
     catDiv.addEventListener('dragend', () => { catDiv.classList.remove('dragging'); catDiv.draggable = false; });
     catDiv.addEventListener('dragenter', e => {
-      // Nogle browsere (bl.a. Firefox) kræver at både dragenter og dragover
-      // annulleres, for konsekvent at tillade drop og undgå browserens
-      // standardhandling (fx forsøg på navigation).
       if(dragCatKey === null) return;
       e.preventDefault();
     });
@@ -1991,8 +2071,6 @@ function renderManagePosts(){
     catHandle.textContent = '⠿';
     catHandle.title = 'Træk for at flytte kategorien';
     catHandle.addEventListener('mousedown', () => { catDiv.draggable = true; });
-    // Hvis man slipper uden at et drag nåede at starte, skal rækken
-    // tilbage til ikke-draggable (dragend fyrer kun efter et reelt drag).
     catDiv.addEventListener('mouseup', () => { catDiv.draggable = false; });
     head.appendChild(catHandle);
     const nameInput = document.createElement('input');
@@ -2012,8 +2090,6 @@ function renderManagePosts(){
     cat.items.forEach(item => {
       const row = document.createElement('div');
       row.className = 'manage-item-row';
-      // Samme princip som kategorierne: draggable aktiveres kun fra handlen,
-      // så tekstmarkering og klik i inputs/checkbox aldrig kaprer musen.
       row.draggable = false;
       row.dataset.itemId = item.id;
       row.addEventListener('dragstart', e => {
@@ -2186,11 +2262,6 @@ function deleteItem(catKey, itemId){
   renderManagePosts();
 }
 
-/* ===================== Utils ===================== */
-/* CSV-eksport: eget budget + de (op til to) tilbud der er aktive i
-   sammenligningen. Semikolon-separeret med UTF-8 BOM, så dansk Excel
-   åbner filen korrekt med det samme. Beløb er de faktiske, budgetterede
-   totaler (kuvertpriser er ganget op med gæsteantallet). */
 function csvField(v){
   const s = String(v ?? '');
   return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
@@ -2244,7 +2315,6 @@ function escapeHtml(s){
 }
 function escapeAttr(s){ return escapeHtml(s); }
 
-/* ===================== Event wiring ===================== */
 document.getElementById('btnAddOffer').onclick = openAddOffer;
 document.getElementById('btnAddOfferEmpty').onclick = openAddOffer;
 document.getElementById('btnCancel').onclick = closeModal;
@@ -2266,8 +2336,6 @@ document.getElementById('btnClosePosts').onclick = closeManagePosts;
 document.getElementById('btnAddCategory').onclick = addCategory;
 document.getElementById('postsOverlay').addEventListener('click', e => { if(e.target.id === 'postsOverlay') closeManagePosts(); });
 
-// Escape lukker en åben modal (inline-redigering af eget budget håndterer
-// selv Escape på input-niveau, og der er ingen modal åben i den situation).
 document.addEventListener('keydown', e => {
   if(e.key !== 'Escape') return;
   if(document.getElementById('overlay').classList.contains('open')) closeModal();
@@ -2288,7 +2356,6 @@ document.getElementById('guestCount').addEventListener('change', e => {
   render();
 });
 
-/* ===================== Init ===================== */
 loadState();
 </script>
 </body>
